@@ -12,11 +12,10 @@ Hent GitHub lageret og kør følgende i `threadArtApplication` mappen.
 ```
 dotnet publish --self-contained true --runtime <RUNTIME_IDENTIFIER>
 ```
-hvor `<RUNTIME_IDENTIFIER>` kommer an på styresystemet. Eksempler på sådanne er: `linux-x64`, `win-x64`, `osx-x64` osv.. Mere information kan findes på .NET RID Catalog (https://docs.microsoft.com/en-us/dotnet/core/rid-catalog). 
+hvor `<RUNTIME_IDENTIFIER>` kommer an på styresystemet. Eksempler på sådanne er: `linux-x64`, `win-x64`, `osx-x64` osv. Mere information kan findes på .NET RID Catalog (https://docs.microsoft.com/en-us/dotnet/core/rid-catalog). 
 
 Yderligere information om `dotnet publish` kan findes hos Microsoft Docs ved https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish.
 
 ## ToDo
-[ ] I afsnittet bygge instruktioner - tilføj krav bl.a. .NET runtime
-[ ] Forklar, at man kan bruge `dotnet run`, så slipper man for at kompilere programmet.
-
+- [ ] I afsnittet bygge instruktioner - tilføj krav bl.a. .NET runtime
+- [ ] Forklar, at man kan bruge `dotnet run`. Så slipper man for at kompilere programmet.
