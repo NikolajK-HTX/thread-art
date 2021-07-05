@@ -1,18 +1,23 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 
 namespace threadArtApplication
 {
     class Program
     {
-        const string INPUT_IMAGE_PATH = @"C:\Users\nikol\Documents\GitHub\thread-art\myselfie.jpg";
-
-        const string OUTPUT_IMAGE_PATH = @"C:\Users\nikol\Documents\GitHub\thread-art\";
-        const int OUTPUT_IMAGE_SIZE = 400;
-
         static void Main(string[] args)
         {
+            string CURRENT_DIRECTORY = Directory.GetCurrentDirectory();
+            string PARENT_DIRECTORY = Directory.GetParent(CURRENT_DIRECTORY).FullName;
+            string INPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, "myselfie.jpg");
+
+            string OUTPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, "outputimage.jpg");
+            const int OUTPUT_IMAGE_SIZE = 400;
+
             Console.WriteLine("Hello World!");
+            Console.WriteLine("OUTPUT_IMAGE_PATH: "+OUTPUT_IMAGE_PATH);
+            Console.WriteLine("INPUT_IMAGE_PATH: "+INPUT_IMAGE_PATH);
 
             Bitmap inputImage = new Bitmap(INPUT_IMAGE_PATH);
 
@@ -28,7 +33,7 @@ namespace threadArtApplication
                 }
             }
             // save the manipulated image
-            inputImage.Save(@"C:\Users\nikol\Documents\GitHub\thread-art\bob.jpg");
+            inputImage.Save(OUTPUT_IMAGE_PATH);
 
             Bitmap outputImage = new Bitmap(OUTPUT_IMAGE_SIZE, OUTPUT_IMAGE_SIZE);
             Graphics g = Graphics.FromImage(outputImage);
