@@ -7,6 +7,12 @@
   - https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 - https://www.youtube.com/watch?v=UsbBSttaJos
 
+Relevante Microsoft Docs
+- https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
+  - https://docs.microsoft.com/en-us/dotnet/core/deploying/single-file#publish-a-single-file-app---cli
+- https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
+- 
+
 Billedet, der medfølger i mappen er taget af Megan Bagshaw og kan findes på følgende link: https://unsplash.com/photos/zYDISXBOWmA.
 
 ## Bygge instruktioner
