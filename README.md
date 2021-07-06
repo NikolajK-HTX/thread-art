@@ -7,6 +7,8 @@
   - https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 - https://www.youtube.com/watch?v=UsbBSttaJos
 
+Billedet, der medfølger i mappen er taget af Megan Bagshaw og kan findes på følgende link: https://unsplash.com/photos/zYDISXBOWmA.
+
 ## Bygge instruktioner
 Hent GitHub lageret og kør følgende i `threadArtApplication` mappen.
 ```
