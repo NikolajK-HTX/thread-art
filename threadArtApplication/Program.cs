@@ -129,21 +129,44 @@ namespace threadArtApplication
             }
         }
 
+        static string pair (int a, int b)
+        {
+            return(a<b ? String.Join('-', new int[2] {a, b}) : String.Join('-', new int[2] {b, a}));
+        }
+
+        static void linesList() 
+        {
+
+        }
+
         static void Main(string[] args)
         {
+            // "Constants" - really settings - meant to be changed with arguments
             string CURRENT_DIRECTORY = Directory.GetCurrentDirectory();
             string PARENT_DIRECTORY = Directory.GetParent(CURRENT_DIRECTORY).FullName;
-            string INPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, "myselfie.jpg");
+            string INPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, "myselfie.jpg"); 
+            // above is not really needed since 
+            // "new Bitmap(string)" can accept a relative path
 
             string OUTPUT_IMAGE_FILENAME = String.Join('-', new String[] {"outputimage"})+".jpg";
             string OUTPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, OUTPUT_IMAGE_FILENAME);
-            const int OUTPUT_IMAGE_SIZE = 400;
+            int OUTPUT_IMAGE_SIZE = 400;
 
-            Console.WriteLine("Hello World!");
+            int NUMBER_OF_THREADS = 2000;
+            int NUMBER_OF_PINS = 200;
+
+            // Write used settings in console
+            Console.WriteLine("Hello, you are running threadArtApplication!");
             Console.WriteLine("OUTPUT_IMAGE_PATH: "+OUTPUT_IMAGE_PATH);
             Console.WriteLine("INPUT_IMAGE_PATH: "+INPUT_IMAGE_PATH);
 
-            Bitmap inputImage = new Bitmap(INPUT_IMAGE_PATH);
+            // Load image
+            if (!File.Exists(INPUT_IMAGE_PATH)) 
+            {
+                Console.WriteLine("Input image was not found :(");
+                Environment.Exit(2);
+            }
+            Bitmap inputImage = new Bitmap(INPUT_IMAGE_PATH);   
 
             int imageWidth = inputImage.Width;
             int imageHeight = inputImage.Height;
@@ -164,6 +187,7 @@ namespace threadArtApplication
             // save the manipulated image
             inputImage.Save(OUTPUT_IMAGE_PATH);
 
+            // Create a new image from Graphics
             Bitmap outputImage = new Bitmap(OUTPUT_IMAGE_SIZE, OUTPUT_IMAGE_SIZE);
             Graphics g = Graphics.FromImage(outputImage);
         }
