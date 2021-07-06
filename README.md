@@ -11,6 +11,7 @@ Relevante Microsoft Docs
 - https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
   - https://docs.microsoft.com/en-us/dotnet/core/deploying/single-file#publish-a-single-file-app---cli
 - https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
+- https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/ref
 - 
 
 Billedet, der medfølger i mappen er taget af Megan Bagshaw og kan findes på følgende link: https://unsplash.com/photos/zYDISXBOWmA.

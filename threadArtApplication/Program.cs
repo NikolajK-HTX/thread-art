@@ -7,9 +7,9 @@ namespace threadArtApplication
 {
     class Point
     {
-        int x;
-        int y;
-        int index;
+        public int x;
+        public int y;
+        public int index;
         public Point(int _x, int _y, int _index)
         {
             x = _x;
@@ -44,10 +44,17 @@ namespace threadArtApplication
                 index++;
             }
         }
+
+        int[] getXY(int _index) 
+        {
+            return (new int[2] {points[_index].x, points[_index].y});
+        }
     }
 
     class Program
     {
+        const int BRIGHTNESS_INCREASE_VALUE = 50;
+
         static int[,] RasterLine(int x0, int y0, int x1, int y1) 
         {
             int dx = x1 - x0;
@@ -93,6 +100,33 @@ namespace threadArtApplication
             }
 
             return pixels;
+        }
+
+        static int lineWeight(Bitmap image, int[,] line) 
+        {
+            int sum = line.GetLength(0) * 255;
+            for (int subArray = 0; subArray < line.GetLength(0); subArray++)
+            {
+                int x = line[subArray, 0];
+                int y = line[subArray, 1];
+                sum -= (int)(image.GetPixel(x, y).GetBrightness()*255);
+            }
+            return (sum);
+        }
+
+        static void changeBrightness(ref Bitmap image, int[,] line) 
+        {
+            for (int subArray = 0; subArray < line.GetLength(0); subArray++)
+            {
+                int x = line[subArray, 0];
+                int y = line[subArray, 1];
+
+                int value = (int) (image.GetPixel(x, y).GetBrightness()*255);
+                value += BRIGHTNESS_INCREASE_VALUE;
+                value = value > 255 ? 255 : value;
+
+                image.SetPixel(x, y, Color.FromArgb(value, value, value));
+            }
         }
 
         static void Main(string[] args)
