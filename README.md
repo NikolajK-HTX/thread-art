@@ -6,6 +6,8 @@
   - https://github.com/sim-on/aNewWayToKnit/blob/master/knit.py
   - https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 - https://www.youtube.com/watch?v=UsbBSttaJos
+- https://www.nuget.org/packages/shortid
+- https://www.nuget.org/packages/System.Drawing.Common
 
 Relevante Microsoft Docs
 - https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
