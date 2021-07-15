@@ -14,7 +14,11 @@ Relevante Microsoft Docs
   - https://docs.microsoft.com/en-us/dotnet/core/deploying/single-file#publish-a-single-file-app---cli
 - https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
 - https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/ref
-- 
+
+Til webserver del af projekt
+- https://www.npmjs.com/package/sqlite3
+- https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/?tabs=netcore-cli
+- https://www.npmjs.com/package/nanoid
 
 Billedet, der medfølger i mappen er taget af Megan Bagshaw og kan findes på følgende link: https://unsplash.com/photos/zYDISXBOWmA.
 
@@ -27,6 +31,6 @@ hvor `<RUNTIME_IDENTIFIER>` kommer an på styresystemet. Eksempler på sådanne 
 
 Yderligere information om `dotnet publish` kan findes hos Microsoft Docs ved https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish.
 
-## ToDo
+## ToDo i forhold til ReadME
 - [ ] I afsnittet bygge instruktioner - tilføj krav bl.a. .NET runtime
 - [ ] Forklar, at man kan bruge `dotnet run`. Så slipper man for at kompilere programmet.
