@@ -155,10 +155,30 @@ namespace threadArtApplication
             int NUMBER_OF_THREADS = 2000;
             int NUMBER_OF_PINS = 200;
 
+            // Change settings based on arguments from terminal
+            for (int i = 0; i < args.Length; i += 2)
+            {
+                string arg = args[i];
+                if (arg == "-i" || arg == "--input-image") {
+                    INPUT_IMAGE_PATH = args[i+1];
+                } else if (arg == "-t" || arg == "--number-of-threads") {
+                    NUMBER_OF_THREADS = int.Parse(args[i+1]);
+                } else if (arg == "-n" || arg == "--number-of-pins") {
+                    NUMBER_OF_PINS = int.Parse(args[i+1]);
+                } else if (arg == "-o" || arg == "--output-image") {
+                    OUTPUT_IMAGE_FILENAME = args[i+1];
+                }
+            }
+
             // Write used settings in console
             Console.WriteLine("Hello, you are running threadArtApplication!");
+            Console.WriteLine();
+            Console.WriteLine("The following settings will be used!");
             Console.WriteLine("OUTPUT_IMAGE_PATH: "+OUTPUT_IMAGE_PATH);
             Console.WriteLine("INPUT_IMAGE_PATH: "+INPUT_IMAGE_PATH);
+            Console.WriteLine("NUMBER_OF_PINS: "+NUMBER_OF_PINS);
+            Console.WriteLine("NUMBER_OF_THREADS: "+NUMBER_OF_THREADS);
+            Console.WriteLine();
 
             // Load image
             if (!File.Exists(INPUT_IMAGE_PATH)) 
@@ -166,7 +186,7 @@ namespace threadArtApplication
                 Console.WriteLine("Input image was not found :(");
                 Environment.Exit(2);
             }
-            Bitmap inputImage = new Bitmap(INPUT_IMAGE_PATH);   
+            /* Bitmap inputImage = new Bitmap(INPUT_IMAGE_PATH);   
 
             int imageWidth = inputImage.Width;
             int imageHeight = inputImage.Height;
@@ -189,7 +209,7 @@ namespace threadArtApplication
 
             // Create a new image from Graphics
             Bitmap outputImage = new Bitmap(OUTPUT_IMAGE_SIZE, OUTPUT_IMAGE_SIZE);
-            Graphics g = Graphics.FromImage(outputImage);
+            Graphics g = Graphics.FromImage(outputImage); */
         }
     }
 }
