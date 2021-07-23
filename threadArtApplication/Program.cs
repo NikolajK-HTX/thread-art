@@ -25,7 +25,8 @@ namespace threadArtApplication
         int centerY;
         int radius;
         float step;
-        List<Point> points;
+        public List<Point> points;
+        public Dictionary<string, int[,]> allLines;
         int index;
 
         public Circle(int center_x, int center_y, int _radius, int num_points)
@@ -38,16 +39,16 @@ namespace threadArtApplication
             index = 0;
             for (angle = 0; angle < 360; angle += step)
             {
-                int x = (int)Math.Cos(angle)*radius+centerX;
-                int y = (int)Math.Sin(angle)*radius+centerY;
+                int x = (int)Math.Cos(angle) * radius + centerX;
+                int y = (int)Math.Sin(angle) * radius + centerY;
                 points.Add(new Point(x, y, index));
                 index++;
             }
         }
 
-        int[] getXY(int _index) 
+        int[] getXY(int _index)
         {
-            return (new int[2] {points[_index].x, points[_index].y});
+            return (new int[2] { points[_index].x, points[_index].y });
         }
     }
 
@@ -55,7 +56,7 @@ namespace threadArtApplication
     {
         const int BRIGHTNESS_INCREASE_VALUE = 50;
 
-        static int[,] RasterLine(int x0, int y0, int x1, int y1) 
+        static int[,] RasterLine(int x0, int y0, int x1, int y1)
         {
             int dx = x1 - x0;
             int dy = y1 - y0;
@@ -67,13 +68,15 @@ namespace threadArtApplication
             dy = Math.Abs(dy);
 
             int xx, xy, yx, yy;
-            if (dx > dy) 
+            if (dx > dy)
             {
                 xx = xsign;
                 xy = 0;
                 yx = 0;
                 yy = ysign;
-            } else {
+            }
+            else
+            {
                 int temp = dx;
                 dx = dy;
                 dy = temp;
@@ -86,13 +89,14 @@ namespace threadArtApplication
             int D = 2 * dy - dx;
             int y = 0;
 
-            int[,] pixels = new int[dx+1, 2];
+            int[,] pixels = new int[dx + 1, 2];
 
-            for (int x = 0; x < dx+1; x++)
+            for (int x = 0; x < dx + 1; x++)
             {
-                pixels[x, 0] = x0 +x * xx + y * yx;
-                pixels[x, 1] = y0 +x * xy + y * yy;
-                if (D>0) {
+                pixels[x, 0] = x0 + x * xx + y * yx;
+                pixels[x, 1] = y0 + x * xy + y * yy;
+                if (D > 0)
+                {
                     y++;
                     D -= dx;
                 }
@@ -102,26 +106,26 @@ namespace threadArtApplication
             return pixels;
         }
 
-        static int lineWeight(Bitmap image, int[,] line) 
+        static int lineWeight(Bitmap image, int[,] line)
         {
             int sum = line.GetLength(0) * 255;
             for (int subArray = 0; subArray < line.GetLength(0); subArray++)
             {
                 int x = line[subArray, 0];
                 int y = line[subArray, 1];
-                sum -= (int)(image.GetPixel(x, y).GetBrightness()*255);
+                sum -= (int)(image.GetPixel(x, y).GetBrightness() * 255);
             }
             return (sum);
         }
 
-        static void changeBrightness(ref Bitmap image, int[,] line) 
+        static void changeBrightness(ref Bitmap image, int[,] line)
         {
             for (int subArray = 0; subArray < line.GetLength(0); subArray++)
             {
                 int x = line[subArray, 0];
                 int y = line[subArray, 1];
 
-                int value = (int) (image.GetPixel(x, y).GetBrightness()*255);
+                int value = (int)(image.GetPixel(x, y).GetBrightness() * 255);
                 value += BRIGHTNESS_INCREASE_VALUE;
                 value = value > 255 ? 255 : value;
 
@@ -129,13 +133,50 @@ namespace threadArtApplication
             }
         }
 
-        static string pair (int a, int b)
+        static string pair(int a, int b)
         {
-            return(a<b ? String.Join('-', new int[2] {a, b}) : String.Join('-', new int[2] {b, a}));
+            return (a < b ? a + "-" + b : b + "-" + a);
         }
 
-        static void linesList() 
+        static void linesList(int steps, Bitmap image, Circle circle, List<string> usedPoints, List<int[]> pointsList, int minimumDifference)
         {
+            Point startPoint = circle.points[0];
+            for (int loops = 0; loops < steps; loops++)
+            {
+                int maxWeight = 0;
+                Point nextPoint;
+                int[,] maxLine;
+                foreach (Point point in circle.points)
+                {
+                    int difference = Math.Abs(point.index - startPoint.index);
+                    if (difference < minimumDifference || difference > (circle.points.Count - minimumDifference))
+                    {
+                        continue;
+                    }
+                    int weight = lineWeight(image, circle.allLines[pair(startPoint.index, point.index)]);
+                    if (weight > maxWeight && point != startPoint && !usedPoints.Contains(pair(startPoint.index, point.index)))
+                    {
+                        maxWeight = weight;
+                        nextPoint = point;
+                        maxLine = circle.allLines[pair(startPoint.index, point.index)];
+                    }
+                }
+                usedPoints.Add(pair(startPoint.index, nextPoint.index));
+                pointsList.Add(new int[2] { startPoint.index, nextPoint.index });
+                changeBrightness(ref image, maxLine);
+                startPoint = nextPoint;
+            }
+        }
+
+        static void draw(List<int[]> pointsList, Circle circle, int size)
+        {
+            Bitmap myNewImage = new Bitmap(size, size);
+            Graphics myGraphics = Graphics.FromImage(myNewImage);
+            for (int i = 0; i < pointsList.Count; i++)
+            {
+                myGraphics.DrawLine()
+                
+            }
 
         }
 
@@ -144,11 +185,11 @@ namespace threadArtApplication
             // "Constants" - really settings - meant to be changed with arguments
             string CURRENT_DIRECTORY = Directory.GetCurrentDirectory();
             string PARENT_DIRECTORY = Directory.GetParent(CURRENT_DIRECTORY).FullName;
-            string INPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, "myselfie.jpg"); 
+            string INPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, "myselfie.jpg");
             // above is not really needed since 
             // "new Bitmap(string)" can accept a relative path
 
-            string OUTPUT_IMAGE_FILENAME = String.Join('-', new String[] {"outputimage"})+".jpg";
+            string OUTPUT_IMAGE_FILENAME = String.Join('-', new String[] { "outputimage" }) + ".jpg";
             string OUTPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, OUTPUT_IMAGE_FILENAME);
             int OUTPUT_IMAGE_SIZE = 400;
 
@@ -159,14 +200,21 @@ namespace threadArtApplication
             for (int i = 0; i < args.Length; i += 2)
             {
                 string arg = args[i];
-                if (arg == "-i" || arg == "--input-image") {
-                    INPUT_IMAGE_PATH = args[i+1];
-                } else if (arg == "-t" || arg == "--number-of-threads") {
-                    NUMBER_OF_THREADS = int.Parse(args[i+1]);
-                } else if (arg == "-n" || arg == "--number-of-pins") {
-                    NUMBER_OF_PINS = int.Parse(args[i+1]);
-                } else if (arg == "-o" || arg == "--output-image") {
-                    OUTPUT_IMAGE_FILENAME = args[i+1];
+                if (arg == "-i" || arg == "--input-image")
+                {
+                    INPUT_IMAGE_PATH = args[i + 1];
+                }
+                else if (arg == "-t" || arg == "--number-of-threads")
+                {
+                    NUMBER_OF_THREADS = int.Parse(args[i + 1]);
+                }
+                else if (arg == "-n" || arg == "--number-of-pins")
+                {
+                    NUMBER_OF_PINS = int.Parse(args[i + 1]);
+                }
+                else if (arg == "-o" || arg == "--output-image")
+                {
+                    OUTPUT_IMAGE_FILENAME = args[i + 1];
                 }
             }
 
@@ -174,14 +222,14 @@ namespace threadArtApplication
             Console.WriteLine("Hello, you are running threadArtApplication!");
             Console.WriteLine();
             Console.WriteLine("The following settings will be used!");
-            Console.WriteLine("OUTPUT_IMAGE_PATH: "+OUTPUT_IMAGE_PATH);
-            Console.WriteLine("INPUT_IMAGE_PATH: "+INPUT_IMAGE_PATH);
-            Console.WriteLine("NUMBER_OF_PINS: "+NUMBER_OF_PINS);
-            Console.WriteLine("NUMBER_OF_THREADS: "+NUMBER_OF_THREADS);
+            Console.WriteLine("OUTPUT_IMAGE_PATH: " + OUTPUT_IMAGE_PATH);
+            Console.WriteLine("INPUT_IMAGE_PATH: " + INPUT_IMAGE_PATH);
+            Console.WriteLine("NUMBER_OF_PINS: " + NUMBER_OF_PINS);
+            Console.WriteLine("NUMBER_OF_THREADS: " + NUMBER_OF_THREADS);
             Console.WriteLine();
 
             // Load image
-            if (!File.Exists(INPUT_IMAGE_PATH)) 
+            if (!File.Exists(INPUT_IMAGE_PATH))
             {
                 Console.WriteLine("Input image was not found :(");
                 Environment.Exit(2);
