@@ -1,11 +1,18 @@
 # thread-art
 
 ## Ressourcer
+Selve algoritmen
 - http://artof01.com/vrellis/works/knit.html
 - https://sim-on.github.io/2017/07/26/hula/
   - https://github.com/sim-on/aNewWayToKnit/blob/master/knit.py
   - https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 - https://www.youtube.com/watch?v=UsbBSttaJos
+- https://eheitzresearch.wordpress.com/implementation-and-realization-of-petros-vrellis-knitting/
+- https://github.com/alyyousuf7/Weaver
+- https://github.com/i-make-robots/weaving_algorithm
+
+ID til specifikke billede
+- https://docs.microsoft.com/en-us/dotnet/api/system.guid?view=net-5.0
 - https://www.nuget.org/packages/shortid
 - https://www.nuget.org/packages/System.Drawing.Common
 
