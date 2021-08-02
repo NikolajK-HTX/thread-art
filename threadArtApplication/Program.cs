@@ -20,13 +20,11 @@ namespace threadArtApplication
 
     class Circle
     {
-        float angle;
         int centerX;
         int centerY;
         int radius;
-        float step;
         public List<Point> points;
-        public Dictionary<string, int[,]> allLines;
+        public Dictionary<string, int[,]> allLines = new Dictionary<string, int[,]>();
         int index;
 
         public Circle(int center_x, int center_y, int _radius, int num_points)
@@ -34,19 +32,18 @@ namespace threadArtApplication
             centerX = center_x;
             centerY = center_y;
             radius = _radius;
-            step = 360 / num_points;
             points = new List<Point>();
             index = 0;
-            for (angle = 0; angle < 360; angle += step)
+            for (int i = 0; i < num_points; i++)
             {
-                int x = (int)Math.Cos(angle) * radius + centerX;
-                int y = (int)Math.Sin(angle) * radius + centerY;
+                int x = (int) Math.Min((Math.Cos(Math.PI*2*i/num_points) * radius + centerX), radius*2-1);
+                int y = (int) Math.Min((Math.Sin(Math.PI*2*i/num_points) * radius + centerY), radius*2-1);
                 points.Add(new Point(x, y, index));
                 index++;
             }
         }
 
-        int[] getXY(int _index)
+        public int[] getXY(int _index)
         {
             return (new int[2] { points[_index].x, points[_index].y });
         }
@@ -120,10 +117,10 @@ namespace threadArtApplication
 
         static void changeBrightness(ref Bitmap image, int[,] line)
         {
-            for (int subArray = 0; subArray < line.GetLength(0); subArray++)
+            for (int subArrayCounter = 0; subArrayCounter < line.GetLength(0); subArrayCounter++)
             {
-                int x = line[subArray, 0];
-                int y = line[subArray, 1];
+                int x = line[subArrayCounter, 0];
+                int y = line[subArrayCounter, 1];
 
                 int value = (int)(image.GetPixel(x, y).GetBrightness() * 255);
                 value += BRIGHTNESS_INCREASE_VALUE;
@@ -144,8 +141,8 @@ namespace threadArtApplication
             for (int loops = 0; loops < steps; loops++)
             {
                 int maxWeight = 0;
-                Point nextPoint;
-                int[,] maxLine;
+                Point nextPoint = new Point(0, 0, 0);
+                int[,] maxLine = new int[,] { { 0, 0 }, { 0, 0 } };
                 foreach (Point point in circle.points)
                 {
                     int difference = Math.Abs(point.index - startPoint.index);
@@ -168,16 +165,24 @@ namespace threadArtApplication
             }
         }
 
-        static void draw(List<int[]> pointsList, Circle circle, int size)
+        static Bitmap draw(List<int[]> pointsList, Circle circle, int size)
         {
-            Bitmap myNewImage = new Bitmap(size, size);
-            Graphics myGraphics = Graphics.FromImage(myNewImage);
+            Bitmap image = new Bitmap(size, size);
+            Graphics myGraphics = Graphics.FromImage(image);
+            Pen blackPen = new Pen(Brushes.Black);
+            blackPen.Width = 1.0F;
             for (int i = 0; i < pointsList.Count; i++)
             {
-                myGraphics.DrawLine()
-                
-            }
+                int[] temporaryPoint = pointsList[i];
+                int[] firstPointArray = circle.getXY(temporaryPoint[0]);
+                int[] secondPointArray = circle.getXY(temporaryPoint[1]);
+                System.Drawing.Point firstPoint = new System.Drawing.Point(firstPointArray[0], firstPointArray[1]);
+                System.Drawing.Point secondPoint = new System.Drawing.Point(secondPointArray[0], secondPointArray[1]);
+                myGraphics.DrawLine(blackPen, firstPoint, secondPoint);
 
+            }
+            blackPen.Dispose();
+            return (image);
         }
 
         static void Main(string[] args)
@@ -189,12 +194,18 @@ namespace threadArtApplication
             // above is not really needed since 
             // "new Bitmap(string)" can accept a relative path
 
-            string OUTPUT_IMAGE_FILENAME = String.Join('-', new String[] { "outputimage" }) + ".jpg";
-            string OUTPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, OUTPUT_IMAGE_FILENAME);
-            int OUTPUT_IMAGE_SIZE = 400;
+            // The reason for the string array is because chosen settings should
+            // be shown in the name of the file.
+            string OUTPUT_IMAGE_FILENAME = "";
+            string OUTPUT_IMAGE_PATH = "";
+            string IMAGE_ID = "AAAAA";
+            int OUTPUT_IMAGE_SIZE = 2048;
 
             int NUMBER_OF_THREADS = 2000;
             int NUMBER_OF_PINS = 200;
+            int MINIMUM_DIFFERENCE = 20;
+
+            string helpString = "./threadArtApplication -i <input_image> -n <number_of_pins> -s <outputimage_size> -t <number_of_threads> -m <minimum_difference> -o <output-image-path> -p <image_id>";
 
             // Change settings based on arguments from terminal
             for (int i = 0; i < args.Length; i += 2)
@@ -216,48 +227,89 @@ namespace threadArtApplication
                 {
                     OUTPUT_IMAGE_FILENAME = args[i + 1];
                 }
+                else if (arg == "-s" || arg == "--output-image-size")
+                {
+                    OUTPUT_IMAGE_SIZE = int.Parse(args[i + 1]);
+                }
+                else if (arg == "-m" || arg == "--minimum-difference")
+                {
+                    MINIMUM_DIFFERENCE = int.Parse(args[i + 1]);
+                }
+                else if (arg == "-o" || arg == "--output-image-path")
+                {
+                    OUTPUT_IMAGE_PATH = args[i + 1];
+                }
+                else if (arg == "-p" || arg == "--image-id")
+                {
+                    IMAGE_ID = args[i + 1];
+                }
+            }
+
+            // If the user has not decided where to place the output image
+            // then the program sets the output itself
+            if (OUTPUT_IMAGE_PATH == "")
+            {
+                OUTPUT_IMAGE_FILENAME = String.Join('-', new String[] { IMAGE_ID, NUMBER_OF_THREADS.ToString(), NUMBER_OF_PINS.ToString(), MINIMUM_DIFFERENCE.ToString() }) + ".png";
+                OUTPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, OUTPUT_IMAGE_FILENAME);
             }
 
             // Write used settings in console
             Console.WriteLine("Hello, you are running threadArtApplication!");
             Console.WriteLine();
             Console.WriteLine("The following settings will be used!");
-            Console.WriteLine("OUTPUT_IMAGE_PATH: " + OUTPUT_IMAGE_PATH);
             Console.WriteLine("INPUT_IMAGE_PATH: " + INPUT_IMAGE_PATH);
             Console.WriteLine("NUMBER_OF_PINS: " + NUMBER_OF_PINS);
             Console.WriteLine("NUMBER_OF_THREADS: " + NUMBER_OF_THREADS);
+            Console.WriteLine("OUTPUT_IMAGE_PATH: " + OUTPUT_IMAGE_PATH);
+            Console.WriteLine("OUTPUT_IMAGE_SIZE: " + OUTPUT_IMAGE_SIZE);
             Console.WriteLine();
 
             // Load image
             if (!File.Exists(INPUT_IMAGE_PATH))
             {
                 Console.WriteLine("Input image was not found :(");
+                Console.WriteLine(helpString);
                 Environment.Exit(2);
             }
-            /* Bitmap inputImage = new Bitmap(INPUT_IMAGE_PATH);   
+
+            Bitmap inputImage = new Bitmap(INPUT_IMAGE_PATH);
 
             int imageWidth = inputImage.Width;
             int imageHeight = inputImage.Height;
-            Circle imageCircle = new Circle(imageWidth/2, imageHeight/2, imageWidth/2, 200);
-            Console.WriteLine(imageCircle);
+            Circle imageCircle = new Circle(imageWidth / 2, imageHeight / 2, imageWidth / 2, NUMBER_OF_PINS);
 
-            int x, y;
-            // Loop through the images pixels and only use red color value.
-            for(x=0; x<inputImage.Width; x++)
+            // Create a dictionary that contains all possible lines
+            for (int i = 0; i < NUMBER_OF_PINS; i++)
             {
-                for(y=0; y<inputImage.Height; y++)
+                for (int j = i+1; j < NUMBER_OF_PINS; j++)
                 {
-                    Color pixelColor = inputImage.GetPixel(x, y);
-                    Color newColor = Color.FromArgb(pixelColor.R, 0, 0);
-                    inputImage.SetPixel(x, y, newColor);
+                    int[] fP = imageCircle.getXY(i);
+                    int[] sP = imageCircle.getXY(j);
+                    imageCircle.allLines.Add(pair(i, j), RasterLine(fP[0], fP[1], sP[0], sP[1]));
                 }
             }
-            // save the manipulated image
-            inputImage.Save(OUTPUT_IMAGE_PATH);
 
-            // Create a new image from Graphics
-            Bitmap outputImage = new Bitmap(OUTPUT_IMAGE_SIZE, OUTPUT_IMAGE_SIZE);
-            Graphics g = Graphics.FromImage(outputImage); */
+            List<int[]> pointsList = new List<int[]>();
+            List<string> usedPoints = new List<string>();
+
+            linesList(NUMBER_OF_THREADS, inputImage, imageCircle, usedPoints, pointsList, MINIMUM_DIFFERENCE);
+
+            Circle outputCircle = new Circle(OUTPUT_IMAGE_SIZE / 2, OUTPUT_IMAGE_SIZE / 2, OUTPUT_IMAGE_SIZE / 2, NUMBER_OF_PINS);
+
+            Bitmap outputImage = draw(pointsList, outputCircle, OUTPUT_IMAGE_SIZE);
+            outputImage.Save(OUTPUT_IMAGE_PATH, System.Drawing.Imaging.ImageFormat.Png);
+
+            // save pointslist to txt file
+            FileStream fParameter = new FileStream(String.Join('-', new String[] { IMAGE_ID, NUMBER_OF_THREADS.ToString(), NUMBER_OF_PINS.ToString(), MINIMUM_DIFFERENCE.ToString() }) + ".txt", FileMode.Create, FileAccess.Write);
+            StreamWriter m_WriterParameter = new StreamWriter(fParameter);
+            m_WriterParameter.BaseStream.Seek(0, SeekOrigin.End);
+            for (int i = 0; i < pointsList.Count; i++)
+            {
+                int[] point = pointsList[i];
+                m_WriterParameter.WriteLine(point[0] + "-" + point[1]);
+            }
+            m_WriterParameter.Flush();
+            m_WriterParameter.Close();
         }
     }
 }
