@@ -236,7 +236,7 @@ namespace threadArtApplication
                 {
                     MINIMUM_DIFFERENCE = int.Parse(args[i + 1]);
                 }
-                else if (arg == "-o" || arg == "--output-image-path")
+                else if (arg == "-d" || arg == "--output-image-path")
                 {
                     OUTPUT_IMAGE_PATH = args[i + 1];
                 }
