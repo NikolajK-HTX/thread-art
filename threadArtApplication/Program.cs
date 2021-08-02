@@ -188,10 +188,11 @@ namespace threadArtApplication
 
         static void Main(string[] args)
         {
+            DateTime firstTime = DateTime.Now;
             // "Constants" - really settings - meant to be changed with arguments
             string CURRENT_DIRECTORY = Directory.GetCurrentDirectory();
             string PARENT_DIRECTORY = Directory.GetParent(CURRENT_DIRECTORY).FullName;
-            string INPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, "myselfie.jpg");
+            string INPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, "selfie.jpg");
             // above is not really needed since 
             // "new Bitmap(string)" can accept a relative path
 
@@ -265,6 +266,12 @@ namespace threadArtApplication
             Console.WriteLine("OUTPUT_IMAGE_SIZE: " + OUTPUT_IMAGE_SIZE);
             Console.WriteLine();
 
+            DateTime secondTime = DateTime.Now;
+            TimeSpan ts = secondTime-firstTime;
+            double msTimespan = ts.TotalMilliseconds;
+            Console.WriteLine(String.Format("Iniatialisering af indstillinger tog: {0} millisekunder", msTimespan));
+            firstTime = DateTime.Now;
+
             // Load image
             if (!File.Exists(INPUT_IMAGE_PATH))
             {
@@ -278,6 +285,12 @@ namespace threadArtApplication
             int imageWidth = inputImage.Width;
             int imageHeight = inputImage.Height;
             Circle imageCircle = new Circle(imageWidth / 2, imageHeight / 2, imageWidth / 2, NUMBER_OF_PINS);
+            
+            secondTime = DateTime.Now;
+            ts = secondTime-firstTime;
+            msTimespan = ts.TotalMilliseconds;
+            Console.WriteLine(String.Format("Cirkel iniatialisering tog: {0} millisekunder", msTimespan));
+            firstTime = DateTime.Now;
 
             // Create a dictionary that contains all possible lines
             for (int i = 0; i < NUMBER_OF_PINS; i++)
@@ -290,15 +303,35 @@ namespace threadArtApplication
                 }
             }
 
+            secondTime = DateTime.Now;
+            ts = secondTime-firstTime;
+            msTimespan = ts.TotalMilliseconds;
+            Console.WriteLine(String.Format("Dict med alle mulige linjer: {0} millisekunder", msTimespan));
+            firstTime = DateTime.Now;
+
+
             List<int[]> pointsList = new List<int[]>();
             List<string> usedPoints = new List<string>();
 
             linesList(NUMBER_OF_THREADS, inputImage, imageCircle, usedPoints, pointsList, MINIMUM_DIFFERENCE);
 
+            secondTime = DateTime.Now;
+            ts = secondTime-firstTime;
+            msTimespan = ts.TotalMilliseconds;
+            Console.WriteLine(String.Format("Main algoritme tog: {0} millisekunder", msTimespan));
+            firstTime = DateTime.Now;
+
+
             Circle outputCircle = new Circle(OUTPUT_IMAGE_SIZE / 2, OUTPUT_IMAGE_SIZE / 2, OUTPUT_IMAGE_SIZE / 2, NUMBER_OF_PINS);
 
             Bitmap outputImage = draw(pointsList, outputCircle, OUTPUT_IMAGE_SIZE);
             outputImage.Save(OUTPUT_IMAGE_PATH, System.Drawing.Imaging.ImageFormat.Png);
+            
+            secondTime = DateTime.Now;
+            ts = secondTime-firstTime;
+            msTimespan = ts.TotalMilliseconds;
+            Console.WriteLine(String.Format("Tegn billede: {0} millisekunder", msTimespan));
+            firstTime = DateTime.Now;
 
             // save pointslist to txt file
             FileStream fParameter = new FileStream(String.Join('-', new String[] { IMAGE_ID, NUMBER_OF_THREADS.ToString(), NUMBER_OF_PINS.ToString(), MINIMUM_DIFFERENCE.ToString() }) + ".txt", FileMode.Create, FileAccess.Write);
@@ -311,6 +344,9 @@ namespace threadArtApplication
             }
             m_WriterParameter.Flush();
             m_WriterParameter.Close();
+            secondTime = DateTime.Now;
+            msTimespan = ts.TotalMilliseconds;
+            Console.WriteLine(String.Format("At skrive til txt-fil tog: {0} millisekunder", msTimespan));
         }
     }
 }
