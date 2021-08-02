@@ -169,6 +169,7 @@ namespace threadArtApplication
         {
             Bitmap image = new Bitmap(size, size);
             Graphics myGraphics = Graphics.FromImage(image);
+            myGraphics.Clear(Color.White);
             Pen blackPen = new Pen(Brushes.Black);
             blackPen.Width = 1.0F;
             for (int i = 0; i < pointsList.Count; i++)
