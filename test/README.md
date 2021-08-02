@@ -1,0 +1,1 @@
+Denne mappe indeholder korrekte resulter fra aNewWayToKnit af sim-on ([link](https://github.com/sim-on/aNewWayToKnit)). Det skal bruges til at se om dette program virker korrekt.
