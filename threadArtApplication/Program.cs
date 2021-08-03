@@ -112,7 +112,7 @@ namespace threadArtApplication
                 int y = line[subArray, 1];
                 sum -= (int)(image.GetPixel(x, y).GetBrightness() * 255);
             }
-            return (sum);
+            return (sum/line.GetLength(0));
         }
 
         static void changeBrightness(ref Bitmap image, int[,] line)
