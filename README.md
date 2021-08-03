@@ -22,7 +22,7 @@ Relevante Microsoft Docs
 - https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
 - https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/ref
 
-GetPixel som sådan gør projektet langsommere - det kan gøres hurtigere ([se mere](http://csharpexamples.com/fast-image-processing-c/)).
+GetPixel som sådan gør projektet [langsommere](https://imgur.com/a/WfjY8Gj) - det kan gøres hurtigere ([se mere](http://csharpexamples.com/fast-image-processing-c/)).
 
 Til webserver del af projekt
 - https://www.npmjs.com/package/sqlite3
