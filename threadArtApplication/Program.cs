@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace threadArtApplication
 {
@@ -36,8 +38,8 @@ namespace threadArtApplication
             index = 0;
             for (int i = 0; i < num_points; i++)
             {
-                int x = (int) Math.Min((Math.Cos(Math.PI*2*i/num_points) * radius + centerX), radius*2-1);
-                int y = (int) Math.Min((Math.Sin(Math.PI*2*i/num_points) * radius + centerY), radius*2-1);
+                int x = (int)Math.Min((Math.Cos(Math.PI * 2 * i / num_points) * radius + centerX), radius * 2 - 1);
+                int y = (int)Math.Min((Math.Sin(Math.PI * 2 * i / num_points) * radius + centerY), radius * 2 - 1);
                 points.Add(new Point(x, y, index));
                 index++;
             }
@@ -103,30 +105,62 @@ namespace threadArtApplication
             return pixels;
         }
 
-        static int lineWeight(Bitmap image, int[,] line)
+        static int lineWeight(byte[] pixels, int[,] line, BitmapData bitmapData, int widthInBytes)
         {
             int sum = line.GetLength(0) * 255;
             for (int subArray = 0; subArray < line.GetLength(0); subArray++)
             {
                 int x = line[subArray, 0];
                 int y = line[subArray, 1];
-                sum -= (int)(image.GetPixel(x, y).GetBrightness() * 255);
+                sum -= GetBrightnessFromPixel(x, y, pixels, bitmapData, widthInBytes);
             }
-            return (sum/line.GetLength(0));
+            return (sum / line.GetLength(0));
         }
 
-        static void changeBrightness(ref Bitmap image, int[,] line)
+        static int GetBrightnessFromPixel(int x, int y, byte[] pixels, BitmapData bitmapData, int bytesPerPixel)
+        {
+            int currentLine = y * bitmapData.Stride;
+            int R = pixels[currentLine + x * bytesPerPixel];
+            int G = pixels[currentLine + x * bytesPerPixel + 1];
+            int B = pixels[currentLine + x * bytesPerPixel + 2];
+
+            float r = (float)R / 255.0f;
+            float g = (float)G / 255.0f;
+            float b = (float)B / 255.0f;
+
+            float max, min;
+
+            max = r; min = r;
+
+            if (g > max) max = g;
+            if (b > max) max = b;
+
+            if (g < min) min = g;
+            if (b < min) min = b;
+
+            return (int)(((max + min) / 2) * 255);
+        }
+
+        static void SetPixelBrightness(byte value, int x, int y, byte[] pixels, BitmapData bitmapData, int bytesPerPixel)
+        {
+            int currentLine = y * bitmapData.Stride;
+            pixels[currentLine + x * bytesPerPixel] = value;
+            pixels[currentLine + x * bytesPerPixel + 1] = value;
+            pixels[currentLine + x * bytesPerPixel + 2] = value;
+        }
+
+        static void changeBrightness(byte[] pixels, int[,] line, BitmapData bitmapData, int bytesPerPixel)
         {
             for (int subArrayCounter = 0; subArrayCounter < line.GetLength(0); subArrayCounter++)
             {
                 int x = line[subArrayCounter, 0];
                 int y = line[subArrayCounter, 1];
 
-                int value = (int)(image.GetPixel(x, y).GetBrightness() * 255);
+                int value = GetBrightnessFromPixel(x, y, pixels, bitmapData, bytesPerPixel);
                 value += BRIGHTNESS_INCREASE_VALUE;
                 value = value > 255 ? 255 : value;
 
-                image.SetPixel(x, y, Color.FromArgb(value, value, value));
+                SetPixelBrightness((byte)value, x, y, pixels, bitmapData, bytesPerPixel);
             }
         }
 
@@ -137,6 +171,16 @@ namespace threadArtApplication
 
         static void linesList(int steps, Bitmap image, Circle circle, List<string> usedPoints, List<int[]> pointsList, int minimumDifference)
         {
+            // locks image in memory
+            BitmapData bitmapData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, image.PixelFormat);
+
+            int bytesPerPixel = Bitmap.GetPixelFormatSize(image.PixelFormat) / 8;
+            int byteCount = bitmapData.Stride * image.Height;
+            byte[] pixels = new byte[byteCount];
+            IntPtr ptrFirstPixel = bitmapData.Scan0;
+            Marshal.Copy(ptrFirstPixel, pixels, 0, pixels.Length);
+            int heightInPixels = bitmapData.Height;
+
             Point startPoint = circle.points[0];
             for (int loops = 0; loops < steps; loops++)
             {
@@ -150,7 +194,7 @@ namespace threadArtApplication
                     {
                         continue;
                     }
-                    int weight = lineWeight(image, circle.allLines[pair(startPoint.index, point.index)]);
+                    int weight = lineWeight(pixels, circle.allLines[pair(startPoint.index, point.index)], bitmapData, bytesPerPixel);
                     if (weight > maxWeight && point != startPoint && !usedPoints.Contains(pair(startPoint.index, point.index)))
                     {
                         maxWeight = weight;
@@ -160,9 +204,12 @@ namespace threadArtApplication
                 }
                 usedPoints.Add(pair(startPoint.index, nextPoint.index));
                 pointsList.Add(new int[2] { startPoint.index, nextPoint.index });
-                changeBrightness(ref image, maxLine);
+                changeBrightness(pixels, maxLine, bitmapData, bytesPerPixel);
                 startPoint = nextPoint;
             }
+
+            Marshal.Copy(pixels, 0, ptrFirstPixel, pixels.Length);
+            image.UnlockBits(bitmapData);
         }
 
         static Bitmap draw(List<int[]> pointsList, Circle circle, int size)
@@ -267,7 +314,7 @@ namespace threadArtApplication
             Console.WriteLine();
 
             DateTime secondTime = DateTime.Now;
-            TimeSpan ts = secondTime-firstTime;
+            TimeSpan ts = secondTime - firstTime;
             double msTimespan = ts.TotalMilliseconds;
             Console.WriteLine(String.Format("Iniatialisering af indstillinger tog: {0} millisekunder", msTimespan));
             firstTime = DateTime.Now;
@@ -285,9 +332,9 @@ namespace threadArtApplication
             int imageWidth = inputImage.Width;
             int imageHeight = inputImage.Height;
             Circle imageCircle = new Circle(imageWidth / 2, imageHeight / 2, imageWidth / 2, NUMBER_OF_PINS);
-            
+
             secondTime = DateTime.Now;
-            ts = secondTime-firstTime;
+            ts = secondTime - firstTime;
             msTimespan = ts.TotalMilliseconds;
             Console.WriteLine(String.Format("Cirkel iniatialisering tog: {0} millisekunder", msTimespan));
             firstTime = DateTime.Now;
@@ -295,7 +342,7 @@ namespace threadArtApplication
             // Create a dictionary that contains all possible lines
             for (int i = 0; i < NUMBER_OF_PINS; i++)
             {
-                for (int j = i+1; j < NUMBER_OF_PINS; j++)
+                for (int j = i + 1; j < NUMBER_OF_PINS; j++)
                 {
                     int[] fP = imageCircle.getXY(i);
                     int[] sP = imageCircle.getXY(j);
@@ -304,7 +351,7 @@ namespace threadArtApplication
             }
 
             secondTime = DateTime.Now;
-            ts = secondTime-firstTime;
+            ts = secondTime - firstTime;
             msTimespan = ts.TotalMilliseconds;
             Console.WriteLine(String.Format("Dict med alle mulige linjer: {0} millisekunder", msTimespan));
             firstTime = DateTime.Now;
@@ -316,7 +363,7 @@ namespace threadArtApplication
             linesList(NUMBER_OF_THREADS, inputImage, imageCircle, usedPoints, pointsList, MINIMUM_DIFFERENCE);
 
             secondTime = DateTime.Now;
-            ts = secondTime-firstTime;
+            ts = secondTime - firstTime;
             msTimespan = ts.TotalMilliseconds;
             Console.WriteLine(String.Format("Main algoritme tog: {0} millisekunder", msTimespan));
             firstTime = DateTime.Now;
@@ -326,9 +373,9 @@ namespace threadArtApplication
 
             Bitmap outputImage = draw(pointsList, outputCircle, OUTPUT_IMAGE_SIZE);
             outputImage.Save(OUTPUT_IMAGE_PATH, System.Drawing.Imaging.ImageFormat.Png);
-            
+
             secondTime = DateTime.Now;
-            ts = secondTime-firstTime;
+            ts = secondTime - firstTime;
             msTimespan = ts.TotalMilliseconds;
             Console.WriteLine(String.Format("Tegn billede: {0} millisekunder", msTimespan));
             firstTime = DateTime.Now;
