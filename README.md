@@ -28,6 +28,9 @@ Til webserver del af projekt
 - https://www.npmjs.com/package/sqlite3
 - https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/?tabs=netcore-cli
 - https://www.npmjs.com/package/nanoid
+- https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/linux-nginx?view=aspnetcore-5.0
+- https://certbot.eff.org/
+- https://www.raspberrypi.org/documentation/
 
 Billedet, der medfølger i mappen er taget af Megan Bagshaw og kan findes på følgende link: https://unsplash.com/photos/zYDISXBOWmA.
 
