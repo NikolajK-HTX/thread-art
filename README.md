@@ -1,5 +1,11 @@
 # thread-art
 
+## Brug af program
+Man har følgende indstillinger, når man kører programmet.
+```
+./threadArtApplication -i <input_image> -n <number_of_pins> -s <outputimage_size> -t <number_of_threads> -m <minimum_difference> -o <output-image-path> -p <image_id>
+```
+
 ## Ressourcer
 Selve algoritmen
 - http://artof01.com/vrellis/works/knit.html
