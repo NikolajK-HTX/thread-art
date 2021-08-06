@@ -6,6 +6,8 @@ Man har følgende indstillinger, når man kører programmet.
 ./threadArtApplication -i <input_image> -n <number_of_pins> -s <outputimage_size> -t <number_of_threads> -m <minimum_difference> -o <output-image-path> -p <image_id>
 ```
 
+Man kan på en p5.js sketch progressivt se, hvordan det ser ud, når trådene sættes på. Den er ikke helt færdig, men man kan se det [her](https://editor.p5js.org/NikolajK-HTX/sketches/q3gxY4B9H). Det virker ved at sætte punkterne fra tekstfilen ind i tekstfeltet.
+
 ## Ressourcer
 Selve algoritmen
 - http://artof01.com/vrellis/works/knit.html
