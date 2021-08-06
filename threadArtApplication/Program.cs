@@ -260,7 +260,12 @@ namespace threadArtApplication
             for (int i = 0; i < args.Length; i += 2)
             {
                 string arg = args[i];
-                if (arg == "-i" || arg == "--input-image")
+                if (arg == "-h" || arg == "--help")
+                {
+                    Console.WriteLine(helpString);
+                    Environment.Exit(0);
+                }
+                else if (arg == "-i" || arg == "--input-image")
                 {
                     INPUT_IMAGE_PATH = args[i + 1];
                 }
@@ -296,9 +301,11 @@ namespace threadArtApplication
 
             // If the user has not decided where to place the output image
             // then the program sets the output itself
+            string ID_FILE_NAME = String.Join('-', new String[] { IMAGE_ID, NUMBER_OF_THREADS.ToString(), NUMBER_OF_PINS.ToString(), MINIMUM_DIFFERENCE.ToString() });
+
             if (OUTPUT_IMAGE_PATH == "")
             {
-                OUTPUT_IMAGE_FILENAME = String.Join('-', new String[] { IMAGE_ID, NUMBER_OF_THREADS.ToString(), NUMBER_OF_PINS.ToString(), MINIMUM_DIFFERENCE.ToString() }) + ".png";
+                OUTPUT_IMAGE_FILENAME = ID_FILE_NAME + ".png";
                 OUTPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, OUTPUT_IMAGE_FILENAME);
             }
 
@@ -381,17 +388,29 @@ namespace threadArtApplication
             firstTime = DateTime.Now;
 
             // save pointslist to txt file
-            FileStream fParameter = new FileStream(String.Join('-', new String[] { IMAGE_ID, NUMBER_OF_THREADS.ToString(), NUMBER_OF_PINS.ToString(), MINIMUM_DIFFERENCE.ToString() }) + ".txt", FileMode.Create, FileAccess.Write);
-            StreamWriter m_WriterParameter = new StreamWriter(fParameter);
-            m_WriterParameter.BaseStream.Seek(0, SeekOrigin.End);
+            string[] lines = new string[pointsList.Count+1];
             for (int i = 0; i < pointsList.Count; i++)
             {
-                int[] point = pointsList[i];
-                m_WriterParameter.WriteLine(point[0] + "-" + point[1]);
+                lines[i] = pointsList[i][0].ToString()+",";
+                if(i == pointsList.Count-1)
+                {
+                    lines[i+1] = pointsList[i][1].ToString();
+                }
             }
-            m_WriterParameter.Flush();
-            m_WriterParameter.Close();
+            System.IO.File.WriteAllLines($"{ID_FILE_NAME}.txt", lines);
+
+            // FileStream fParameter = new FileStream($"{ID_FILE_NAME}.png", FileMode.Create, FileAccess.Write);
+            // StreamWriter m_WriterParameter = new StreamWriter(fParameter);
+            // m_WriterParameter.BaseStream.Seek(0, SeekOrigin.End);
+            // for (int i = 0; i < pointsList.Count; i++)
+            // {
+            //     int[] point = pointsList[i];
+            //     m_WriterParameter.WriteLine(point[0] + "-" + point[1]);
+            // }
+            // m_WriterParameter.Flush();
+            // m_WriterParameter.Close();
             secondTime = DateTime.Now;
+            ts = secondTime - firstTime;
             msTimespan = ts.TotalMilliseconds;
             Console.WriteLine(String.Format("At skrive til txt-fil tog: {0} millisekunder", msTimespan));
         }
