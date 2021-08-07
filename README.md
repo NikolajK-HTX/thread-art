@@ -43,6 +43,8 @@ Til webserver del af projekt
 Billedet, der medfølger i mappen er taget af Megan Bagshaw og kan findes på følgende link: https://unsplash.com/photos/zYDISXBOWmA.
 
 ## Bygge instruktioner
+På linux kræves ``libgdiplus``, som kan installeres med ``sudo dnf install libgdiplus``. I stedet for ``dnf`` kan ``apt`` eller (formentlig) andre package managers bruges.
+
 Hent GitHub lageret og kør følgende i `threadArtApplication` mappen.
 ```
 dotnet publish --self-contained true --runtime <RUNTIME_IDENTIFIER>
