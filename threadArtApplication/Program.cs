@@ -248,7 +248,7 @@ namespace threadArtApplication
             string OUTPUT_IMAGE_FILENAME = "";
             string OUTPUT_IMAGE_PATH = "";
             string IMAGE_ID = "AAAAA";
-            int OUTPUT_IMAGE_SIZE = 2048;
+            int OUTPUT_IMAGE_SIZE = 1024;
 
             int NUMBER_OF_THREADS = 2000;
             int NUMBER_OF_PINS = 200;
