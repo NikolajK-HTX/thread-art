@@ -18,6 +18,7 @@ Selve algoritmen
 - https://eheitzresearch.wordpress.com/implementation-and-realization-of-petros-vrellis-knitting/
 - https://github.com/alyyousuf7/Weaver
 - https://github.com/i-make-robots/weaving_algorithm
+- https://halfmonty.github.io/StringArtGenerator/
 
 ID til specifikke billede
 - https://docs.microsoft.com/en-us/dotnet/api/system.guid?view=net-5.0
