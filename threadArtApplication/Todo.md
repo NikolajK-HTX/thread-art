@@ -1,4 +1,4 @@
 # Todo - threadArtApplication
-- [ ] Ændr Pen farve til at være (0, 0, 0, 75).
+- [x] Ændr Pen farve til at være (100, 0, 0, 0).
 - [ ] Implementer directory argument
 - [ ] Kontrast + mere

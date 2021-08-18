@@ -217,8 +217,7 @@ namespace threadArtApplication
             Bitmap image = new Bitmap(size, size);
             Graphics myGraphics = Graphics.FromImage(image);
             myGraphics.Clear(Color.White);
-            Pen blackPen = new Pen(Brushes.Black);
-            blackPen.Width = 1.0F;
+            Pen blackPen = new Pen(Color.FromArgb(100, 0, 0, 0), 2);
             for (int i = 0; i < pointsList.Count; i++)
             {
                 int[] temporaryPoint = pointsList[i];
