@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Drawing;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -236,9 +236,9 @@ namespace threadArtApplication
         {
             DateTime firstTime = DateTime.Now;
             // "Constants" - really settings - meant to be changed with arguments
-            string CURRENT_DIRECTORY = Directory.GetCurrentDirectory();
-            string PARENT_DIRECTORY = Directory.GetParent(CURRENT_DIRECTORY).FullName;
-            string INPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, "selfie.jpg");
+            string CURRENT_DIRECTORY = System.IO.Directory.GetCurrentDirectory();
+            string PARENT_DIRECTORY = System.IO.Directory.GetParent(CURRENT_DIRECTORY).FullName;
+            string INPUT_IMAGE_PATH = System.IO.Path.Combine(PARENT_DIRECTORY, "selfie.jpg");
             // above is not really needed since 
             // "new Bitmap(string)" can accept a relative path
 
@@ -305,7 +305,7 @@ namespace threadArtApplication
             if (OUTPUT_IMAGE_PATH == "")
             {
                 OUTPUT_IMAGE_FILENAME = ID_FILE_NAME + ".png";
-                OUTPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, OUTPUT_IMAGE_FILENAME);
+                OUTPUT_IMAGE_PATH = System.IO.Path.Combine(PARENT_DIRECTORY, OUTPUT_IMAGE_FILENAME);
             }
 
             // Write used settings in console
@@ -326,14 +326,14 @@ namespace threadArtApplication
             firstTime = DateTime.Now;
 
             // Load image
-            if (!File.Exists(INPUT_IMAGE_PATH))
+            if (!System.IO.File.Exists(INPUT_IMAGE_PATH))
             {
                 Console.WriteLine("Input image was not found :(");
                 Console.WriteLine(helpString);
                 Environment.Exit(2);
             }
 
-            Bitmap inputImage = new Bitmap(INPUT_IMAGE_PATH);
+            Image<Rgb24> inputImage = Image.Load<Rgb24>(INPUT_IMAGE_PATH);
 
             int imageWidth = inputImage.Width;
             int imageHeight = inputImage.Height;
@@ -367,6 +367,7 @@ namespace threadArtApplication
             List<string> usedPoints = new List<string>();
 
             linesList(NUMBER_OF_THREADS, inputImage, imageCircle, usedPoints, pointsList, MINIMUM_DIFFERENCE);
+            inputImage.Dispose();
 
             secondTime = DateTime.Now;
             ts = secondTime - firstTime;
@@ -398,16 +399,6 @@ namespace threadArtApplication
             }
             System.IO.File.WriteAllLines($"{ID_FILE_NAME}.txt", lines);
 
-            // FileStream fParameter = new FileStream($"{ID_FILE_NAME}.png", FileMode.Create, FileAccess.Write);
-            // StreamWriter m_WriterParameter = new StreamWriter(fParameter);
-            // m_WriterParameter.BaseStream.Seek(0, SeekOrigin.End);
-            // for (int i = 0; i < pointsList.Count; i++)
-            // {
-            //     int[] point = pointsList[i];
-            //     m_WriterParameter.WriteLine(point[0] + "-" + point[1]);
-            // }
-            // m_WriterParameter.Flush();
-            // m_WriterParameter.Close();
             secondTime = DateTime.Now;
             ts = secondTime - firstTime;
             msTimespan = ts.TotalMilliseconds;
