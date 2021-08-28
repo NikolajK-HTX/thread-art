@@ -1,7 +1,7 @@
 ﻿using System;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Drawing;
+using System.IO;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -236,9 +236,9 @@ namespace threadArtApplication
         {
             DateTime firstTime = DateTime.Now;
             // "Constants" - really settings - meant to be changed with arguments
-            string CURRENT_DIRECTORY = System.IO.Directory.GetCurrentDirectory();
-            string PARENT_DIRECTORY = System.IO.Directory.GetParent(CURRENT_DIRECTORY).FullName;
-            string INPUT_IMAGE_PATH = System.IO.Path.Combine(PARENT_DIRECTORY, "selfie.jpg");
+            string CURRENT_DIRECTORY = Directory.GetCurrentDirectory();
+            string PARENT_DIRECTORY = Directory.GetParent(CURRENT_DIRECTORY).FullName;
+            string INPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, "selfie.jpg");
             // above is not really needed since 
             // "new Bitmap(string)" can accept a relative path
 
@@ -305,7 +305,7 @@ namespace threadArtApplication
             if (OUTPUT_IMAGE_PATH == "")
             {
                 OUTPUT_IMAGE_FILENAME = ID_FILE_NAME + ".png";
-                OUTPUT_IMAGE_PATH = System.IO.Path.Combine(PARENT_DIRECTORY, OUTPUT_IMAGE_FILENAME);
+                OUTPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, OUTPUT_IMAGE_FILENAME);
             }
 
             // Write used settings in console
@@ -326,7 +326,7 @@ namespace threadArtApplication
             firstTime = DateTime.Now;
 
             // Load image
-            if (!System.IO.File.Exists(INPUT_IMAGE_PATH))
+            if (!File.Exists(INPUT_IMAGE_PATH))
             {
                 Console.WriteLine("Input image was not found :(");
                 Console.WriteLine(helpString);
@@ -397,7 +397,7 @@ namespace threadArtApplication
                     lines[i+1] = pointsList[i][1].ToString();
                 }
             }
-            System.IO.File.WriteAllLines($"{ID_FILE_NAME}.txt", lines);
+            File.WriteAllLines($"{ID_FILE_NAME}.txt", lines);
 
             secondTime = DateTime.Now;
             ts = secondTime - firstTime;
