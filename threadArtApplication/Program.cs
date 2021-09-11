@@ -3,7 +3,6 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.IO;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace threadArtApplication
 {
