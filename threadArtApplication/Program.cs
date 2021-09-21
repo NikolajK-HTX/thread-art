@@ -1,9 +1,11 @@
 ﻿using System;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using System.IO;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace threadArtApplication
 {
@@ -105,24 +107,25 @@ namespace threadArtApplication
             return pixels;
         }
 
-        static int lineWeight(byte[] pixels, int[,] line, BitmapData bitmapData, int widthInBytes)
+        static int lineWeight(int[,] line, Image<Rgb24> image)
         {
             int sum = line.GetLength(0) * 255;
             for (int subArray = 0; subArray < line.GetLength(0); subArray++)
             {
                 int x = line[subArray, 0];
                 int y = line[subArray, 1];
-                sum -= GetBrightnessFromPixel(x, y, pixels, bitmapData, widthInBytes);
+                sum -= GetBrightnessFromPixel(x, y, image);
             }
             return (sum / line.GetLength(0));
         }
 
-        static int GetBrightnessFromPixel(int x, int y, byte[] pixels, BitmapData bitmapData, int bytesPerPixel)
+        static int GetBrightnessFromPixel(int x, int y, Image<Rgb24> image)
         {
-            int currentLine = y * bitmapData.Stride;
-            int R = pixels[currentLine + x * bytesPerPixel];
-            int G = pixels[currentLine + x * bytesPerPixel + 1];
-            int B = pixels[currentLine + x * bytesPerPixel + 2];
+            Span<Rgb24> pixelRowSpan = image.GetPixelRowSpan(y);
+
+            int R = (int)pixelRowSpan[x].R;
+            int G = (int)pixelRowSpan[x].G;
+            int B = (int)pixelRowSpan[x].B;
 
             float r = (float)R / 255.0f;
             float g = (float)G / 255.0f;
@@ -141,26 +144,24 @@ namespace threadArtApplication
             return (int)(((max + min) / 2) * 255);
         }
 
-        static void SetPixelBrightness(byte value, int x, int y, byte[] pixels, BitmapData bitmapData, int bytesPerPixel)
+        static void SetPixelBrightness(byte value, int x, int y, Image<Rgb24> image)
         {
-            int currentLine = y * bitmapData.Stride;
-            pixels[currentLine + x * bytesPerPixel] = value;
-            pixels[currentLine + x * bytesPerPixel + 1] = value;
-            pixels[currentLine + x * bytesPerPixel + 2] = value;
+            Span<Rgb24> pixelRowSpan = image.GetPixelRowSpan(y);
+            pixelRowSpan[x] = new Rgb24(value, value, value);
         }
 
-        static void changeBrightness(byte[] pixels, int[,] line, BitmapData bitmapData, int bytesPerPixel)
+        static void changeBrightness(int[,] line, Image<Rgb24> image)
         {
             for (int subArrayCounter = 0; subArrayCounter < line.GetLength(0); subArrayCounter++)
             {
                 int x = line[subArrayCounter, 0];
                 int y = line[subArrayCounter, 1];
 
-                int value = GetBrightnessFromPixel(x, y, pixels, bitmapData, bytesPerPixel);
+                int value = GetBrightnessFromPixel(x, y, image);
                 value += BRIGHTNESS_INCREASE_VALUE;
                 value = value > 255 ? 255 : value;
 
-                SetPixelBrightness((byte)value, x, y, pixels, bitmapData, bytesPerPixel);
+                SetPixelBrightness((byte)value, x, y, image);
             }
         }
 
@@ -169,17 +170,9 @@ namespace threadArtApplication
             return (a < b ? a + "-" + b : b + "-" + a);
         }
 
-        static void linesList(int steps, Bitmap image, Circle circle, List<string> usedPoints, List<int[]> pointsList, int minimumDifference)
+        static void linesList(int steps, Image<Rgb24> image, Circle circle, List<string> usedPoints, List<int[]> pointsList, int minimumDifference)
         {
-            // locks image in memory
-            BitmapData bitmapData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, image.PixelFormat);
-
-            int bytesPerPixel = Bitmap.GetPixelFormatSize(image.PixelFormat) / 8;
-            int byteCount = bitmapData.Stride * image.Height;
-            byte[] pixels = new byte[byteCount];
-            IntPtr ptrFirstPixel = bitmapData.Scan0;
-            Marshal.Copy(ptrFirstPixel, pixels, 0, pixels.Length);
-            int heightInPixels = bitmapData.Height;
+            int heightInPixels = image.Height;
 
             Point startPoint = circle.points[0];
             for (int loops = 0; loops < steps; loops++)
@@ -194,7 +187,7 @@ namespace threadArtApplication
                     {
                         continue;
                     }
-                    int weight = lineWeight(pixels, circle.allLines[pair(startPoint.index, point.index)], bitmapData, bytesPerPixel);
+                    int weight = lineWeight(circle.allLines[pair(startPoint.index, point.index)], image);
                     if (weight > maxWeight && point != startPoint && !usedPoints.Contains(pair(startPoint.index, point.index)))
                     {
                         maxWeight = weight;
@@ -204,32 +197,35 @@ namespace threadArtApplication
                 }
                 usedPoints.Add(pair(startPoint.index, nextPoint.index));
                 pointsList.Add(new int[2] { startPoint.index, nextPoint.index });
-                changeBrightness(pixels, maxLine, bitmapData, bytesPerPixel);
+                changeBrightness(maxLine, image);
                 startPoint = nextPoint;
             }
-
-            Marshal.Copy(pixels, 0, ptrFirstPixel, pixels.Length);
-            image.UnlockBits(bitmapData);
         }
 
-        static Bitmap draw(List<int[]> pointsList, Circle circle, int size)
+        static Image<Rgb24> draw(List<int[]> pointsList, Circle circle, int size)
         {
-            Bitmap image = new Bitmap(size, size);
-            Graphics myGraphics = Graphics.FromImage(image);
-            myGraphics.Clear(Color.White);
-            Pen blackPen = new Pen(Color.FromArgb(100, 0, 0, 0), 2);
+            Image<Rgb24> image = new Image<Rgb24>(size, size);
+
+            IPen pen = Pens.Solid(Color.Black, 1.0f);
+            PointF[] drawPoints = new PointF[pointsList.Count+1];
+
             for (int i = 0; i < pointsList.Count; i++)
             {
+                
                 int[] temporaryPoint = pointsList[i];
                 int[] firstPointArray = circle.getXY(temporaryPoint[0]);
-                int[] secondPointArray = circle.getXY(temporaryPoint[1]);
-                System.Drawing.Point firstPoint = new System.Drawing.Point(firstPointArray[0], firstPointArray[1]);
-                System.Drawing.Point secondPoint = new System.Drawing.Point(secondPointArray[0], secondPointArray[1]);
-                myGraphics.DrawLine(blackPen, firstPoint, secondPoint);
 
+                drawPoints[i] = new PointF(firstPointArray[0], firstPointArray[1]);
+                if (i == pointsList.Count-1) 
+                {
+                    int[] secondPointArray = circle.getXY(temporaryPoint[1]);
+                    drawPoints[i+1] = new PointF(secondPointArray[0], secondPointArray[1]);
+                }
             }
-            blackPen.Dispose();
-            return (image);
+
+
+            image.Mutate(x => x.DrawLines(pen, drawPoints));
+            return(image);
         }
 
         static void Main(string[] args)
@@ -238,7 +234,7 @@ namespace threadArtApplication
             // "Constants" - really settings - meant to be changed with arguments
             string CURRENT_DIRECTORY = Directory.GetCurrentDirectory();
             string PARENT_DIRECTORY = Directory.GetParent(CURRENT_DIRECTORY).FullName;
-            string INPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, "selfie.jpg");
+            string INPUT_IMAGE_PATH = System.IO.Path.Combine(PARENT_DIRECTORY, "selfie.jpg");
             // above is not really needed since 
             // "new Bitmap(string)" can accept a relative path
 
@@ -305,7 +301,7 @@ namespace threadArtApplication
             if (OUTPUT_IMAGE_PATH == "")
             {
                 OUTPUT_IMAGE_FILENAME = ID_FILE_NAME + ".png";
-                OUTPUT_IMAGE_PATH = Path.Combine(PARENT_DIRECTORY, OUTPUT_IMAGE_FILENAME);
+                OUTPUT_IMAGE_PATH = System.IO.Path.Combine(PARENT_DIRECTORY, OUTPUT_IMAGE_FILENAME);
             }
 
             // Write used settings in console
@@ -378,8 +374,8 @@ namespace threadArtApplication
 
             Circle outputCircle = new Circle(OUTPUT_IMAGE_SIZE / 2, OUTPUT_IMAGE_SIZE / 2, OUTPUT_IMAGE_SIZE / 2, NUMBER_OF_PINS);
 
-            Bitmap outputImage = draw(pointsList, outputCircle, OUTPUT_IMAGE_SIZE);
-            outputImage.Save(OUTPUT_IMAGE_PATH, System.Drawing.Imaging.ImageFormat.Png);
+            Image<Rgb24> outputImage = draw(pointsList, outputCircle, OUTPUT_IMAGE_SIZE);
+            ImageExtensions.SaveAsPng(outputImage, OUTPUT_IMAGE_PATH);
 
             secondTime = DateTime.Now;
             ts = secondTime - firstTime;
