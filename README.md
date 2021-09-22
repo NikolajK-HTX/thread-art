@@ -57,3 +57,20 @@ Yderligere information om `dotnet publish` kan findes hos Microsoft Docs ved htt
 ## ToDo i forhold til ReadME
 - [ ] I afsnittet bygge instruktioner - tilføj krav bl.a. .NET runtime
 - [ ] Forklar, at man kan bruge `dotnet run`. Så slipper man for at kompilere programmet.
+
+## Bibliotek ydelse
+Ydelsen af programmet kommer selvfølgelig an på processoren ud over det anvendte bibliotek. Windows maskinen kører med en `i5-6600k@3.5GHz`, Linux med en `i5-8250u@3.4GHz` og Linux Arm med `Cortex-A53@1.4GHz` (der er tale om en Raspberry Pi 3 B+).
+
+Bibliotek     | Windows | Linux | Linux Arm
+--------------|---------|-------|----------
+ImageSharp    | 4,6s    | 5,49s | 38,24s
+System.Drawing| 0.67s   | 2,22s | NA
+SkiaSharp     | tbd     | tbd   | tbd
+
+For at `System.Drawing` virker på Linux skal `libgdiplus` være installeret, men desværre virker det ikke på `Linux Arm` eller `Linux Arm 64`, da det giver følgende fejl:
+```
+Unhandled exception. System.ArgumentException: Parameter is not valid.
+   at System.Drawing.SafeNativeMethods.Gdip.CheckStatus(Int32 status)
+   at System.Drawing.Bitmap..ctor(String filename, Boolean useIcm)
+   at threadArtApplication.Program.Main(String[] args) in C:\Users\nikol\Documents\GitHub\thread-art\threadArtApplication\Program.cs:line 336
+```
