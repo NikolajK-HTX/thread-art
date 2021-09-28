@@ -66,6 +66,7 @@ Bibliotek     | Windows | Linux | Linux Arm
 ImageSharp    | 4,6s    | 5,49s | 38,24s
 System.Drawing| 0.67s   | 2,22s | NA
 SkiaSharp     | tbd     | tbd   | tbd
+Halide        | tbd     | tbd   | tbd
 
 For at `System.Drawing` virker på Linux skal `libgdiplus` være installeret, men desværre virker det ikke på `Linux Arm` eller `Linux Arm 64`, da det giver følgende fejl:
 ```
@@ -74,3 +75,5 @@ Unhandled exception. System.ArgumentException: Parameter is not valid.
    at System.Drawing.Bitmap..ctor(String filename, Boolean useIcm)
    at threadArtApplication.Program.Main(String[] args) in C:\Users\nikol\Documents\GitHub\thread-art\threadArtApplication\Program.cs:line 336
 ```
+
+Mere information om `Halide` kan findes ved https://halide-lang.org/.
