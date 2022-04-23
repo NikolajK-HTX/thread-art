@@ -35,6 +35,15 @@ GetPixel som sådan gør projektet [langsommere](https://imgur.com/a/WfjY8Gj) - 
 
 Billedet, der medfølger i mappen er taget af Megan Bagshaw og kan findes på følgende link: https://unsplash.com/photos/zYDISXBOWmA.
 
+Upload af billeder kan ske med
+ - https://www.dropzone.dev/js/
+ - https://pqina.nl/filepond/
+
+ - https://github.com/dropzone/dropzone
+ - https://github.com/pqina/filepond
+
+Lige umiddelbart synes jeg bedst om dropzone
+
 ## Bygge instruktioner
 På linux kræves ``libgdiplus``, som kan installeres med ``sudo dnf install libgdiplus``. I stedet for ``dnf`` kan ``apt`` eller (formentlig) andre package managers bruges.
 
