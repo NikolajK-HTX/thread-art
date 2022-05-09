@@ -7,6 +7,10 @@ import (
 	"os"
 )
 
+func bresenham() {
+	//
+}
+
 func main() {
 	fmt.Println("Hello!")
 	f, _ := os.Open("../selfie.jpg")
@@ -14,7 +18,9 @@ func main() {
 	// so you need to seek to (0, 0) if open the file
 	// again. 
 	// https://stackoverflow.com/questions/62846156/image-decode-unknown-format
-	
+	// the benefit is that the image is not read so it is
+	// possible to check the dimensions before loading
+
 	// newImageConfig, _, _ := image.DecodeConfig(f)
 
 	// width := newImageConfig.Width
