@@ -7,37 +7,33 @@ import (
 	"os"
 )
 
-func bresenham() {
-	//
-}
-
 func main() {
 	fmt.Println("Hello!")
 	f, _ := os.Open("../selfie.jpg")
+
 	// using image.DecodeConfig(f) consumes all of f
 	// so you need to seek to (0, 0) if open the file
-	// again. 
+	// again.
 	// https://stackoverflow.com/questions/62846156/image-decode-unknown-format
 	// the benefit is that the image is not read so it is
 	// possible to check the dimensions before loading
 
-	// newImageConfig, _, _ := image.DecodeConfig(f)
+	decodedImageConfig, _, _ := image.DecodeConfig(f)
 
-	// width := newImageConfig.Width
-	// height := newImageConfig.Height
+	width := decodedImageConfig.Width
+	height := decodedImageConfig.Height
 
-	// if width > 400 || height > 400 {
-	// 	fmt.Println("Image dimensions not supported.")
-	// 	fmt.Println("The limit is 400 pixels.")
+	if width != 400 || height != 400 {
+		fmt.Println("Image dimensions not supported.")
+		fmt.Println("Only square by 400 pixels is accepted.")
 
-	// 	os.Exit(1)
-	// }
+		os.Exit(1)
+	}
 
-	newImage, myString, err := image.Decode(f)
+	f.Seek(0, 0)
 
-	width := newImage.Bounds().Size().X
-	height := newImage.Bounds().Size().Y
-	
+	decodedImage, myString, err := image.Decode(f)
+
 	if err != nil {
 		fmt.Println(myString)
 		fmt.Println(err.Error())
@@ -47,11 +43,14 @@ func main() {
 	var sum uint64 = 0
 	for x := 1; x < width; x++ {
 		for y := 1; y < height; y++ {
-			pixel := newImage.At(x, y)
+			pixel := decodedImage.At(x, y)
 			R, _, _, _ := pixel.RGBA()
 
-			sum += uint64(R/257)
+			sum += uint64(R / 257)
 		}
 	}
 	fmt.Println(sum)
+
+	// test bresenham
+	fmt.Printf("%v", Bresenham(1, 1, 10, 10))
 }
