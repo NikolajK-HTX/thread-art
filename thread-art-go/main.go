@@ -80,13 +80,28 @@ func main() {
 	// results at hand than creating them when needed to check
 	// the weight of possible lines and decide which to draw a line on.
 
-	var lines map[string]Point
-	lines = make(map[string]Point)
+	var lines map[string][]Point = make(map[string][]Point)
 
-	var x0, y0, x1, y1 int
-	x0 = circle[2].X
-	y0 = circle[2].Y
-	x1 = circle[102].X
-	y1 = circle[102].Y
-	fmt.Printf("%v", Bresenham(x0, y0, x1, y1))
+	for a := 0; a < numberOfPoints; a++ {
+		for b := a+1; b < numberOfPoints; b++ {
+			var pair = fmt.Sprintf("%d-%d", a, b)
+			var x0, y0, x1, y1 int
+
+			x0 = circle[a].X
+			y0 = circle[a].Y
+			x1 = circle[b].X
+			y1 = circle[b].Y
+
+			lines[pair] = Bresenham(x0, y0, x1, y1)
+		}
+	}
+
+	fmt.Printf("%v\n", len(lines))
+
+	// var x0, y0, x1, y1 int
+	// x0 = circle[2].X
+	// y0 = circle[2].Y
+	// x1 = circle[102].X
+	// y1 = circle[102].Y
+	// fmt.Printf("%v", Bresenham(x0, y0, x1, y1))
 }
