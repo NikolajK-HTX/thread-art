@@ -11,6 +11,18 @@ import (
 var imagePath = "../selfie.jpg"
 var numberOfPoints = 200
 
+func getPair(a, b int) string {
+	switch {
+	case a < b:
+		return fmt.Sprintf("%d-%d", a, b)
+	case a > b:
+		return fmt.Sprintf("%d-%d", b, a)
+	default:
+		fmt.Println("An error has occured - Please try again.")
+		os.Exit(1)
+	}
+}
+
 func constrain(x, a, b int) int {
 	switch {
 	case x < a:
