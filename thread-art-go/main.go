@@ -3,13 +3,17 @@ package main
 import (
 	"fmt"
 	"image"
+	"image/color"
 	_ "image/jpeg"
+	"log"
 	"math"
 	"os"
 )
 
 var imagePath = "../selfie.jpg"
 var numberOfPoints = 200
+var rap = 1000
+var minimumDifference int = int(math.Floor(float64(numberOfPoints) / 10.0))
 
 func getPair(a, b int) string {
 	switch {
@@ -20,6 +24,7 @@ func getPair(a, b int) string {
 	default:
 		fmt.Println("An error has occured - Please try again.")
 		os.Exit(1)
+		return ""
 	}
 }
 
@@ -60,30 +65,31 @@ func main() {
 
 	decodedImage, myString, err := image.Decode(f)
 
+	log.Printf("Image type: %T", decodedImage)
+
 	if err != nil {
 		fmt.Println(myString)
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 
-	var sum uint64 = 0
-	for x := 1; x < width; x++ {
-		for y := 1; y < height; y++ {
-			pixel := decodedImage.At(x, y)
-			R, _, _, _ := pixel.RGBA()
+	// var sum uint64 = 0
+	// for x := 1; x < width; x++ {
+	// 	for y := 1; y < height; y++ {
+	// 		pixel := decodedImage.At(x, y)
+	// 		R, _, _, _ := pixel.RGBA()
 
-			sum += uint64(R / 257)
-		}
-	}
-	fmt.Println(sum)
+	// 		sum += uint64(R / 257)
+	// 	}
+	// }
 
 	// create points outlining circle
 	var circle []Point
 	for i := 0; i < numberOfPoints; i++ {
 		var x, y int
-		angle := float64(math.Pi)*2.0/float64(numberOfPoints) * float64(i)
-		x = constrain(int(math.Cos(angle)*float64(width)/2.0 + float64(width)/2.0), 0, width)
-		y = constrain(int(math.Sin(angle)*float64(height)/2.0 + float64(height)/2.0), 0, width)
+		angle := float64(math.Pi) * 2.0 / float64(numberOfPoints) * float64(i)
+		x = constrain(int(math.Cos(angle)*float64(width)/2.0+float64(width)/2.0), 0, width)
+		y = constrain(int(math.Sin(angle)*float64(height)/2.0+float64(height)/2.0), 0, width)
 		circle = append(circle, Point{x, y})
 	}
 
@@ -95,7 +101,7 @@ func main() {
 	var lines map[string][]Point = make(map[string][]Point)
 
 	for a := 0; a < numberOfPoints; a++ {
-		for b := a+1; b < numberOfPoints; b++ {
+		for b := a + 1; b < numberOfPoints; b++ {
 			var pair = fmt.Sprintf("%d-%d", a, b)
 			var x0, y0, x1, y1 int
 
@@ -108,12 +114,33 @@ func main() {
 		}
 	}
 
-	fmt.Printf("%v\n", len(lines))
+	var startPointIndex = 0
+	var _ = circle[startPointIndex]
 
-	// var x0, y0, x1, y1 int
-	// x0 = circle[2].X
-	// y0 = circle[2].Y
-	// x1 = circle[102].X
-	// y1 = circle[102].Y
-	// fmt.Printf("%v", Bresenham(x0, y0, x1, y1))
+	for i := 0; i < rap; i++ {
+		var maxWeight = 0
+		var maxLine = []Point{{0, 0}, {0, 0}}
+
+		//go through every line and determine weight
+		for index, _ := range circle {
+			var difference int = int(math.Abs(float64(index) - float64(startPointIndex)))
+			if difference < minimumDifference || difference > (len(circle)-minimumDifference) {
+				continue
+			}
+			var line = lines[getPair(startPointIndex, index)]
+			var weight int = len(line) * 255
+			for _, pixelPosition := range line {
+				pixel := decodedImage.At(pixelPosition.X, pixelPosition.Y)
+				// Value of pixel goes from 0 to 255
+				value := color.GrayModel.Convert(pixel).(color.Gray).Y
+				weight -= int(value)
+			}
+
+			if weight > maxWeight {
+				maxLine = line
+			}
+		}
+	}
+
+	fmt.Printf("Totals to %v different lines = n*(n-1)/2\n", len(lines))
 }
