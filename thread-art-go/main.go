@@ -13,7 +13,10 @@ import (
 var imagePath = "../selfie.jpg"
 var numberOfPoints = 200
 var rap = 1000
-var minimumDifference int = int(math.Floor(float64(numberOfPoints) / 10.0))
+var minimumDifference = 30
+// var minimumDifference = int(math.Floor(float64(numberOfPoints) / 10.0))
+
+var brightnessFactor = 20
 
 func getPair(a, b int) string {
 	switch {
@@ -36,6 +39,14 @@ func constrain(x, a, b int) int {
 		return b
 	default:
 		return x
+	}
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	} else {
+		return b
 	}
 }
 
@@ -65,14 +76,29 @@ func main() {
 
 	decodedImage, myString, err := image.Decode(f)
 
-	log.Printf("Image type: %T", decodedImage)
-
 	if err != nil {
 		fmt.Println(myString)
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 
+	log.Printf("Image type: %T", decodedImage)
+
+	// Convert image to gray
+	// Makes it easier to get the pixel value
+	// decodedImage is read only, but the new converted
+	// image can be changed.
+	bounds := decodedImage.Bounds()
+	grayImage := image.NewGray(bounds)
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			grayImage.Set(x, y, decodedImage.At(x, y))
+		}
+	}
+
+	// Get the sum of every pixel's red channel.
+	// Test if it is the same as other languages.
+	// Result: It is not the same as Python or Rust.
 	// var sum uint64 = 0
 	// for x := 1; x < width; x++ {
 	// 	for y := 1; y < height; y++ {
@@ -114,33 +140,50 @@ func main() {
 		}
 	}
 
-	var startPointIndex = 0
-	var _ = circle[startPointIndex]
+	var pointIndex = 0
+	var pointsList = []int{pointIndex}
 
 	for i := 0; i < rap; i++ {
 		var maxWeight = 0
 		var maxLine = []Point{{0, 0}, {0, 0}}
+		var maxPointIndex = 0
 
 		//go through every line and determine weight
-		for index, _ := range circle {
-			var difference int = int(math.Abs(float64(index) - float64(startPointIndex)))
+		for nextPointIndex := range circle {
+			var difference int = int(math.Abs(float64(nextPointIndex) - float64(pointIndex)))
+
 			if difference < minimumDifference || difference > (len(circle)-minimumDifference) {
 				continue
 			}
-			var line = lines[getPair(startPointIndex, index)]
-			var weight int = len(line) * 255
+
+			var line = lines[getPair(pointIndex, nextPointIndex)]
+			var weight = len(line) * 255
+
 			for _, pixelPosition := range line {
-				pixel := decodedImage.At(pixelPosition.X, pixelPosition.Y)
+				pixel := grayImage.GrayAt(pixelPosition.X, pixelPosition.Y)
 				// Value of pixel goes from 0 to 255
-				value := color.GrayModel.Convert(pixel).(color.Gray).Y
+				value := pixel.Y
 				weight -= int(value)
 			}
 
+			weight = weight / len(line)
+
 			if weight > maxWeight {
 				maxLine = line
+				maxPointIndex = nextPointIndex
 			}
+		}
+
+		pointsList = append(pointsList, maxPointIndex)
+		pointIndex = maxPointIndex
+
+		// Lower brightness of chosen line
+		for _, pixelPosition := range maxLine {
+			var pixel = int(grayImage.GrayAt(pixelPosition.X, pixelPosition.Y).Y)
+			grayImage.SetGray(pixelPosition.X, pixelPosition.Y, color.Gray{uint8(max(0, pixel-brightnessFactor))})
 		}
 	}
 
 	fmt.Printf("Totals to %v different lines = n*(n-1)/2\n", len(lines))
+	fmt.Printf("These %v\n", pointsList)
 }
