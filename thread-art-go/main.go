@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	_ "image/jpeg"
+	"image/png"
 	"log"
 	"math"
 	"os"
@@ -14,9 +15,14 @@ var imagePath = "../selfie.jpg"
 var numberOfPoints = 200
 var rap = 1000
 var minimumDifference = 30
+
 // var minimumDifference = int(math.Floor(float64(numberOfPoints) / 10.0))
 
 var brightnessFactor = 20
+
+// func drawLine(pair string) {
+
+// }
 
 func getPair(a, b int) string {
 	switch {
@@ -44,6 +50,14 @@ func constrain(x, a, b int) int {
 
 func max(a, b int) int {
 	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
+func min(a, b int) int {
+	if a < b {
 		return a
 	} else {
 		return b
@@ -186,4 +200,39 @@ func main() {
 
 	fmt.Printf("Totals to %v different lines = n*(n-1)/2\n", len(lines))
 	fmt.Printf("These %v\n", pointsList)
+
+	drawImage := image.NewGray(bounds)
+
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
+			drawImage.SetGray(x, y, color.Gray{255})
+		}
+	}
+
+	// draw line
+	for i := 1; i < len(pointsList); i++ {
+		firstPointIndex := pointsList[i-1]
+		secondPointIndex := pointsList[i]
+		line := lines[getPair(firstPointIndex, secondPointIndex)]
+		for _, point := range line {
+			currentValue := drawImage.GrayAt(point.X, point.Y).Y
+			newValue := max(int(currentValue)-20, 0)
+			drawImage.SetGray(point.X, point.Y, color.Gray{uint8(newValue)})
+		}
+	}
+
+	// save image as png
+	outFile, err := os.Create("outimage.png")
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(2)
+	}
+
+	err = png.Encode(outFile, drawImage)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(3)
+	}
+
+	outFile.Close()
 }

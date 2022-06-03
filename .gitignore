@@ -448,3 +448,4 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/dotnetcore,csharp,visualstudiocode,windows,linux
 myselfie.jpg
 thread-art-go/main
+thread-art-go/outimage.png
