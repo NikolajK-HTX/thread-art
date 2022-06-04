@@ -9,6 +9,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"time"
 )
 
 var imagePath = "../selfie-exposure.jpg"
@@ -67,6 +68,7 @@ func min(a, b int) int {
 }
 
 func main() {
+	start := time.Now()
 	f, _ := os.Open(imagePath)
 
 	// using image.DecodeConfig(f) consumes all of f
@@ -216,10 +218,9 @@ func main() {
 		}
 	}
 
-	fmt.Printf("Totals to %v different lines = n*(n-1)/2\n", len(lines))
-	fmt.Printf("Total pointsList = %v\n", len(pointsList))
-	fmt.Printf("\n%v\n", pointsList)
-	fmt.Printf("Total usedPairs = %v\n", len(usedPairs))
+	// fmt.Printf("Totals to %v different lines = n*(n-1)/2\n", len(lines))
+	// fmt.Printf("Total pointsList = %v\n", len(pointsList))
+	// fmt.Printf("Total usedPairs = %v\n", len(usedPairs))
 
 	drawImage := image.NewGray(bounds)
 
@@ -270,4 +271,8 @@ func main() {
 
 	outPointFile.WriteString(outString)
 	outPointFile.Close()
+
+	end := time.Now()
+	elapsed := end.Sub(start)
+	fmt.Println(elapsed.Seconds())
 }
