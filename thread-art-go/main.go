@@ -13,12 +13,12 @@ import (
 
 var imagePath = "../selfie-exposure.jpg"
 var numberOfPoints = 200
-var rap = 3000
-var minimumDifference = 30
+var rap = 1000
+var minimumDifference = 20
 
 // var minimumDifference = int(math.Floor(float64(numberOfPoints) / 10.0))
 
-var brightnessFactor = 20
+var brightnessFactor = 50
 
 // func drawLine(pair string) {
 
@@ -32,6 +32,7 @@ func getPair(a, b int) string {
 		return fmt.Sprintf("%d-%d", b, a)
 	default:
 		fmt.Println("An error has occured - Please try again.")
+		fmt.Printf("%d-%d\n", a, b)
 		fmt.Printf("a=%d and b=%d\n", a, b)
 		os.Exit(1)
 		return ""
@@ -57,13 +58,13 @@ func max(a, b int) int {
 	}
 }
 
-// func min(a, b int) int {
-// 	if a < b {
-// 		return a
-// 	} else {
-// 		return b
-// 	}
-// }
+func min(a, b int) int {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
+}
 
 func main() {
 	f, _ := os.Open(imagePath)
@@ -208,16 +209,17 @@ func main() {
 		pointsList = append(pointsList, maxPointIndex)
 		pointIndex = maxPointIndex
 
-		// Lower brightness of chosen line
+		// Brighthen brightness of chosen line
 		for _, pixelPosition := range maxLine {
 			var pixel = int(grayImage.GrayAt(pixelPosition.X, pixelPosition.Y).Y)
-			value := uint8(max(0, pixel-brightnessFactor))
+			value := uint8(min(255, pixel+brightnessFactor))
 			grayImage.SetGray(pixelPosition.X, pixelPosition.Y, color.Gray{value})
 		}
 	}
 
 	fmt.Printf("Totals to %v different lines = n*(n-1)/2\n", len(lines))
 	fmt.Printf("Total pointsList = %v\n", len(pointsList))
+	fmt.Printf("\n%v\n", pointsList)
 	fmt.Printf("Total usedPairs = %v\n", len(usedPairs))
 
 	drawImage := image.NewGray(bounds)
@@ -244,13 +246,13 @@ func main() {
 	outFile, err := os.Create("outimage.png")
 	if err != nil {
 		fmt.Println(err.Error())
-		os.Exit(2)
+		os.Exit(1)
 	}
 
 	err = png.Encode(outFile, drawImage)
 	if err != nil {
 		fmt.Println(err.Error())
-		os.Exit(3)
+		os.Exit(1)
 	}
 
 	outFile.Close()
