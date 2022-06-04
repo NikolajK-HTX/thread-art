@@ -11,9 +11,9 @@ import (
 	"os"
 )
 
-var imagePath = "../selfie.jpg"
+var imagePath = "../selfie-exposure.jpg"
 var numberOfPoints = 200
-var rap = 1000
+var rap = 3000
 var minimumDifference = 30
 
 // var minimumDifference = int(math.Floor(float64(numberOfPoints) / 10.0))
@@ -32,6 +32,7 @@ func getPair(a, b int) string {
 		return fmt.Sprintf("%d-%d", b, a)
 	default:
 		fmt.Println("An error has occured - Please try again.")
+		fmt.Printf("a=%d and b=%d\n", a, b)
 		os.Exit(1)
 		return ""
 	}
@@ -56,13 +57,13 @@ func max(a, b int) int {
 	}
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	} else {
-		return b
-	}
-}
+// func min(a, b int) int {
+// 	if a < b {
+// 		return a
+// 	} else {
+// 		return b
+// 	}
+// }
 
 func main() {
 	f, _ := os.Open(imagePath)
@@ -74,7 +75,13 @@ func main() {
 	// the benefit is that the image is not read so it is
 	// possible to check the dimensions before loading
 
-	decodedImageConfig, _, _ := image.DecodeConfig(f)
+	decodedImageConfig, _, err := image.DecodeConfig(f)
+
+	if err != nil {
+		fmt.Printf("Does file exist at %s with correct suffix\n", imagePath)
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 
 	width := decodedImageConfig.Width
 	height := decodedImageConfig.Height
@@ -156,17 +163,26 @@ func main() {
 
 	var pointIndex = 0
 	var pointsList = []int{pointIndex}
+	var usedPairs map[string]struct{} = make(map[string]struct{})
 
 	for i := 0; i < rap; i++ {
 		var maxWeight = 0
 		var maxLine = []Point{{0, 0}, {0, 0}}
 		var maxPointIndex = 0
 
-		//go through every line and determine weight
-		for nextPointIndex := range circle {
+		//go through every line, calculate its weight and determine next point
+		for nextPointIndex := 0; nextPointIndex < len(circle); nextPointIndex++ {
+			if pointIndex == nextPointIndex {
+				continue
+			}
+
 			var difference int = int(math.Abs(float64(nextPointIndex) - float64(pointIndex)))
 
 			if difference < minimumDifference || difference > (len(circle)-minimumDifference) {
+				continue
+			}
+
+			if _, exists := usedPairs[getPair(nextPointIndex, pointIndex)]; exists {
 				continue
 			}
 
@@ -188,18 +204,21 @@ func main() {
 			}
 		}
 
+		usedPairs[getPair(pointIndex, maxPointIndex)] = struct{}{}
 		pointsList = append(pointsList, maxPointIndex)
 		pointIndex = maxPointIndex
 
 		// Lower brightness of chosen line
 		for _, pixelPosition := range maxLine {
 			var pixel = int(grayImage.GrayAt(pixelPosition.X, pixelPosition.Y).Y)
-			grayImage.SetGray(pixelPosition.X, pixelPosition.Y, color.Gray{uint8(max(0, pixel-brightnessFactor))})
+			value := uint8(max(0, pixel-brightnessFactor))
+			grayImage.SetGray(pixelPosition.X, pixelPosition.Y, color.Gray{value})
 		}
 	}
 
 	fmt.Printf("Totals to %v different lines = n*(n-1)/2\n", len(lines))
-	fmt.Printf("These %v\n", pointsList)
+	fmt.Printf("Total pointsList = %v\n", len(pointsList))
+	fmt.Printf("Total usedPairs = %v\n", len(usedPairs))
 
 	drawImage := image.NewGray(bounds)
 
