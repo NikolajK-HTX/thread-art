@@ -68,6 +68,9 @@ ImageSharp    | 4,6s    | 5,49s | 38,24s
 System.Drawing| 0.67s   | 2,22s | NA
 SkiaSharp     | tbd     | tbd   | tbd
 Halide        | tbd     | tbd   | tbd
+Go stdlib     | 0.36s   | tbd   | tbd
+
+Go stdlib er kørt med andre RAM på Windows. Linux er den samme (når den bliver kørt).
 
 For at `System.Drawing` virker på Linux skal `libgdiplus` være installeret, men desværre virker det ikke på `Linux Arm` eller `Linux Arm 64`, da det giver følgende fejl:
 ```
