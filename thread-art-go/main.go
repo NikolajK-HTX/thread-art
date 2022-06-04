@@ -177,7 +177,7 @@ func main() {
 				continue
 			}
 
-			var difference int = int(math.Abs(float64(nextPointIndex) - float64(pointIndex)))
+			difference := int(math.Abs(float64(nextPointIndex) - float64(pointIndex)))
 
 			if difference < minimumDifference || difference > (len(circle)-minimumDifference) {
 				continue
@@ -187,19 +187,18 @@ func main() {
 				continue
 			}
 
-			var line = lines[getPair(pointIndex, nextPointIndex)]
-			var weight = len(line) * 255
+			line := lines[getPair(pointIndex, nextPointIndex)]
+			weight := len(line) * 255
 
 			for _, pixelPosition := range line {
-				pixel := grayImage.GrayAt(pixelPosition.X, pixelPosition.Y)
-				// Value of pixel goes from 0 to 255
-				value := pixel.Y
-				weight -= int(value)
+				pixelColor := grayImage.GrayAt(pixelPosition.X, pixelPosition.Y).Y
+				weight -= int(pixelColor)
 			}
 
 			weight = weight / len(line)
 
 			if weight > maxWeight {
+				maxWeight = weight
 				maxLine = line
 				maxPointIndex = nextPointIndex
 			}
@@ -256,4 +255,19 @@ func main() {
 	}
 
 	outFile.Close()
+
+	outPointFile, err := os.Create("goPoints.txt")
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	outString := ""
+
+	for _, pointIndex := range pointsList {
+		outString += fmt.Sprintf("%d,\n", pointIndex)
+	}
+
+	outPointFile.WriteString(outString)
+	outPointFile.Close()
 }
