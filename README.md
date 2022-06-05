@@ -33,7 +33,7 @@ Relevante Microsoft Docs
 
 GetPixel som sådan gør projektet [langsommere](https://imgur.com/a/WfjY8Gj) - det kan gøres hurtigere ([se mere](http://csharpexamples.com/fast-image-processing-c/)).
 
-Billedet, der medfølger i mappen er taget af Megan Bagshaw og kan findes på følgende link: https://unsplash.com/photos/zYDISXBOWmA.
+Billedet, der medfølger i mappen er taget af [Megan Bagshaw](https://unsplash.com/@megbagshaw) og kan findes på følgende link: https://unsplash.com/photos/zYDISXBOWmA ([web.archive.org](https://web.archive.org/web/20201203024840/https://unsplash.com/photos/zYDISXBOWmA) og [direkte link](https://images.unsplash.com/photo-1592124549776-a7f0cc973b24?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjEyMDd9)).
 
 Upload af billeder kan ske med
  - https://www.dropzone.dev/js/
@@ -53,7 +53,7 @@ Programmet kompileres med
 ```
 go build
 ```
-og køres med ``./thread-art-go`` (Linux) eller ``.\thread-art-go.exe`` (Windows).
+og køres med `./thread-art-go` (Linux) eller `.\thread-art-go.exe` (Windows).
 
 Man kan også nøjes med
 ```
@@ -62,19 +62,27 @@ go run .
 Det kører programmet, men man får ikke en eksekverbar fil.
 
 ### Dotnet version
-På linux kræves ``libgdiplus``, som kan installeres med ``sudo dnf install libgdiplus``. I stedet for ``dnf`` kan ``apt`` eller (formentlig) andre package managers bruges.
+Installer dotnet fra [dotnet.microsoft.com](https://dotnet.microsoft.com/en-us/download). Hent GitHub kataloget med 
+```
+git clone https://github.com/NikolajK-HTX/thread-art.git
+```
 
-Hent GitHub lageret og kør følgende i `threadArtApplication` mappen.
+Programmet afhænger af `System.Drawing` og biblioteket hentes med
+```
+dotnet add package System.Drawing.Common --version 6.0.0
+```
+
+Man behøver ikke bruge `dotnet publish` og kan nøjes med `dotnet run`. Hvis man ønsker at få en eksekverbar fil, skal man bruge `dotnet publish` i stedet for.
 ```
 dotnet publish --self-contained true --runtime <RUNTIME_IDENTIFIER>
 ```
 hvor `<RUNTIME_IDENTIFIER>` kommer an på styresystemet. Eksempler på sådanne er: `linux-x64`, `win-x64`, `osx-x64` osv. Mere information kan findes på .NET RID Catalog (https://docs.microsoft.com/en-us/dotnet/core/rid-catalog). 
 
+Resultatet findes i `./bin/<BUILD-CONFIGURATION>/<TFM>/publish/`.
+
 Yderligere information om `dotnet publish` kan findes hos Microsoft Docs ved https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish.
 
-## ToDo i forhold til ReadME
-- [ ] I afsnittet bygge instruktioner - tilføj krav bl.a. .NET runtime
-- [ ] Forklar, at man kan bruge `dotnet run`. Så slipper man for at kompilere programmet.
+På linux kræves `libgdiplus`, som kan installeres med `sudo dnf install libgdiplus`. I stedet for `dnf` kan `apt` eller (formentlig) andre package managers bruges.
 
 ## Bibliotek ydelse
 Ydelsen af programmet kommer selvfølgelig an på processoren ud over det anvendte bibliotek. Windows maskinen kører med en `i5-6600k@3.5GHz`, Linux med en `i5-8250u@3.4GHz` og Linux Arm med `Cortex-A53@1.4GHz` (der er tale om en Raspberry Pi 3 B+).
@@ -89,7 +97,7 @@ Go stdlib     | 0,53s   | 0,51s | tbd
 
 Go stdlib er kørt med andre RAM på Windows. "Linux" har samme hardware, men kører en nyere linux kernel.
 
-For at `System.Drawing` virker på Linux skal `libgdiplus` være installeret, men desværre virker det ikke på `Linux Arm` eller `Linux Arm 64`, da det giver følgende fejl:
+For at biblioteket `System.Drawing` virker på Linux skal `libgdiplus` være installeret, men desværre virker det ikke på `Linux Arm` eller `Linux Arm 64`, da det giver følgende fejl:
 ```
 Unhandled exception. System.ArgumentException: Parameter is not valid.
    at System.Drawing.SafeNativeMethods.Gdip.CheckStatus(Int32 status)
@@ -98,3 +106,9 @@ Unhandled exception. System.ArgumentException: Parameter is not valid.
 ```
 
 Mere information om `Halide` kan findes ved https://halide-lang.org/, men det virker ikke som om, det kan anvendes til dette projekt.
+
+## Tak til 
+- https://github.com/dchest/uniuri
+- https://github.com/sim-on/aNewWayToKnit
+- https://github.com/fputs/bresenham
+- https://unsplash.com/@megbagshaw

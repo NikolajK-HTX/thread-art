@@ -1,3 +1,7 @@
+// Inspired by
+// https://pkg.go.dev/github.com/dchest/uniuri
+// Slightly modified to better fit this program
+
 package main
 
 import (
