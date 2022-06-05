@@ -45,6 +45,23 @@ Upload af billeder kan ske med
 Lige umiddelbart synes jeg bedst om dropzone
 
 ## Bygge instruktioner
+
+### Go version
+Hent go fra [go.dev](https://go.dev/doc/install).
+
+Programmet kompileres med
+```
+go build
+```
+og køres med ``./thread-art-go`` (Linux) eller ``.\thread-art-go.exe`` (Windows).
+
+Man kan også nøjes med
+```
+go run .
+```
+Det kører programmet, men man får ikke en eksekverbar fil.
+
+### Dotnet version
 På linux kræves ``libgdiplus``, som kan installeres med ``sudo dnf install libgdiplus``. I stedet for ``dnf`` kan ``apt`` eller (formentlig) andre package managers bruges.
 
 Hent GitHub lageret og kør følgende i `threadArtApplication` mappen.
@@ -65,12 +82,12 @@ Ydelsen af programmet kommer selvfølgelig an på processoren ud over det anvend
 Bibliotek     | Windows | Linux | Linux Arm
 --------------|---------|-------|----------
 ImageSharp    | 4,6s    | 5,49s | 38,24s
-System.Drawing| 0.67s   | 2,22s | NA
+System.Drawing| 0,67s   | 2,22s | NA
 SkiaSharp     | tbd     | tbd   | tbd
 Halide        | tbd     | tbd   | tbd
-Go stdlib     | 0.36s   | tbd   | tbd
+Go stdlib     | 0,53s   | 0,51s | tbd
 
-Go stdlib er kørt med andre RAM på Windows. Linux er den samme (når den bliver kørt).
+Go stdlib er kørt med andre RAM på Windows. "Linux" har samme hardware, men kører en nyere linux kernel.
 
 For at `System.Drawing` virker på Linux skal `libgdiplus` være installeret, men desværre virker det ikke på `Linux Arm` eller `Linux Arm 64`, da det giver følgende fejl:
 ```
@@ -80,4 +97,4 @@ Unhandled exception. System.ArgumentException: Parameter is not valid.
    at threadArtApplication.Program.Main(String[] args) in C:\Users\nikol\Documents\GitHub\thread-art\threadArtApplication\Program.cs:line 336
 ```
 
-Mere information om `Halide` kan findes ved https://halide-lang.org/.
+Mere information om `Halide` kan findes ved https://halide-lang.org/, men det virker ikke som om, det kan anvendes til dette projekt.
