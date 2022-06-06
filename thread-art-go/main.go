@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"image"
 	"image/color"
@@ -11,19 +12,6 @@ import (
 	"os"
 	"time"
 )
-
-var imagePath = "../selfie-exposure.jpg"
-var numberOfPoints = 200
-var rap = 2000
-var minimumDifference = 20
-
-// var minimumDifference = int(math.Floor(float64(numberOfPoints) / 10.0))
-
-var brightnessFactor = 50
-
-// func drawLine(pair string) {
-
-// }
 
 func getPair(a, b int) string {
 	switch {
@@ -68,12 +56,40 @@ func min(a, b int) int {
 }
 
 func main() {
+	log.SetFlags(0)
+	log.SetPrefix("Log: ")
+
 	start := time.Now()
+
+	var imagePath string
+	var numberOfPins int
+	var rap int
+	var minimumDifference int
+	// var minimumDifference = int(math.Floor(float64(numberOfPoints) / 10.0))
+	var brightnessFactor int
+	var lineAlpha int
+
+	flag.StringVar(&imagePath, "i", "../selfie-exposure.jpg",
+		"The path to the image.")
+	flag.IntVar(&numberOfPins, "n", 200,
+		"A higher amount of pins makes the result more precise.")
+	flag.IntVar(&rap, "t", 3000, "Amount of thread raps")
+	flag.IntVar(&minimumDifference, "d", 20,
+		"The next pin can't be next to current pin.")
+	flag.IntVar(&brightnessFactor, "b", 50,
+		"Amount to brighten pixel")
+	flag.IntVar(&lineAlpha, "l", 20, "The alpha of the drawn lines.")
+	flag.Parse()
+
+	end := time.Now()
+	elapsed := end.Sub(start)
+	log.Printf("Time spent on parsing flags %.2f\n", elapsed.Seconds())
+
+	start = time.Now()
 	f, _ := os.Open(imagePath)
 
 	// using image.DecodeConfig(f) consumes all of f
-	// so you need to seek to (0, 0) if open the file
-	// again.
+	// so you need to seek to (0, 0) if open the file again.
 	// https://stackoverflow.com/questions/62846156/image-decode-unknown-format
 	// the benefit is that the image is not read so it is
 	// possible to check the dimensions before loading
@@ -81,19 +97,16 @@ func main() {
 	decodedImageConfig, _, err := image.DecodeConfig(f)
 
 	if err != nil {
-		fmt.Printf("Does file exist at %s with correct suffix\n", imagePath)
-		fmt.Println(err.Error())
-		os.Exit(1)
+		log.Printf("Does file exist at %s with correct suffix\n", imagePath)
+		log.Fatalln(err.Error())
 	}
 
 	width := decodedImageConfig.Width
 	height := decodedImageConfig.Height
 
 	if width != 400 || height != 400 {
-		fmt.Printf("Image at '%v' dimensions not supported.\n", imagePath)
-		fmt.Println("Only square by 400 pixels is accepted.")
-
-		os.Exit(1)
+		log.Printf("Image at '%v' dimensions not supported.\n", imagePath)
+		log.Fatalln("Only square by 400 pixels is accepted.")
 	}
 
 	f.Seek(0, 0)
@@ -101,17 +114,14 @@ func main() {
 	decodedImage, myString, err := image.Decode(f)
 
 	if err != nil {
-		fmt.Println(myString)
-		fmt.Println(err.Error())
-		os.Exit(1)
+		log.Println(myString)
+		log.Fatalln(err.Error())
 	}
 
-	log.Printf("Image type: %T", decodedImage)
+	// log.Printf("Image type: %T", decodedImage)
 
-	// Convert image to gray
-	// Makes it easier to get the pixel value
-	// decodedImage is read only, but the new converted
-	// image can be changed.
+	// Convert image to gray. Makes it easier to get the pixel value
+	// decodedImage is read only, but the new converted image can be changed.
 	bounds := decodedImage.Bounds()
 	grayImage := image.NewGray(bounds)
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
@@ -135,9 +145,9 @@ func main() {
 
 	// create points outlining circle
 	var circle []Point
-	for i := 0; i < numberOfPoints; i++ {
+	for i := 0; i < numberOfPins; i++ {
 		var x, y int
-		angle := float64(math.Pi) * 2.0 / float64(numberOfPoints) * float64(i)
+		angle := float64(math.Pi) * 2.0 / float64(numberOfPins) * float64(i)
 		x = constrain(int(math.Cos(angle)*float64(width)/2.0+float64(width)/2.0), 0, width)
 		y = constrain(int(math.Sin(angle)*float64(height)/2.0+float64(height)/2.0), 0, width)
 		circle = append(circle, Point{x, y})
@@ -150,8 +160,8 @@ func main() {
 
 	var lines map[string][]Point = make(map[string][]Point)
 
-	for a := 0; a < numberOfPoints; a++ {
-		for b := a + 1; b < numberOfPoints; b++ {
+	for a := 0; a < numberOfPins; a++ {
+		for b := a + 1; b < numberOfPins; b++ {
 			var pair = fmt.Sprintf("%d-%d", a, b)
 			var x0, y0, x1, y1 int
 
@@ -210,7 +220,7 @@ func main() {
 		pointsList = append(pointsList, maxPointIndex)
 		pointIndex = maxPointIndex
 
-		// Brighthen brightness of chosen line
+		// Brighthen pixel of chosen line
 		for _, pixelPosition := range maxLine {
 			var pixel = int(grayImage.GrayAt(pixelPosition.X, pixelPosition.Y).Y)
 			value := uint8(min(255, pixel+brightnessFactor))
@@ -218,9 +228,9 @@ func main() {
 		}
 	}
 
-	// fmt.Printf("Totals to %v different lines = n*(n-1)/2\n", len(lines))
-	// fmt.Printf("Total pointsList = %v\n", len(pointsList))
-	// fmt.Printf("Total usedPairs = %v\n", len(usedPairs))
+	// log.Printf("Totals to %v different lines = n*(n-1)/2\n", len(lines))
+	// log.Printf("Total pointsList = %v\n", len(pointsList))
+	// log.Printf("Total usedPairs = %v\n", len(usedPairs))
 
 	drawImage := image.NewGray(bounds)
 
@@ -237,7 +247,7 @@ func main() {
 		line := lines[getPair(firstPointIndex, secondPointIndex)]
 		for _, point := range line {
 			currentValue := drawImage.GrayAt(point.X, point.Y).Y
-			newValue := max(int(currentValue)-20, 0)
+			newValue := max(int(currentValue)-lineAlpha, 0)
 			drawImage.SetGray(point.X, point.Y, color.Gray{uint8(newValue)})
 		}
 	}
@@ -245,22 +255,20 @@ func main() {
 	// save image as png
 	outFile, err := os.Create("outimage.png")
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		log.Fatalln(err.Error())
 	}
 
 	err = png.Encode(outFile, drawImage)
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		log.Fatalln(err.Error())
 	}
 
 	outFile.Close()
 
-	outPointFile, err := os.Create("goPoints.txt")
+	// Write the list of pins the thread is going around
+	outPointFile, err := os.Create("pin-thread-list.txt")
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		log.Fatalln(err.Error())
 	}
 
 	outString := ""
@@ -272,7 +280,8 @@ func main() {
 	outPointFile.WriteString(outString)
 	outPointFile.Close()
 
-	end := time.Now()
-	elapsed := end.Sub(start)
-	fmt.Println(elapsed.Seconds())
+	end = time.Now()
+	elapsed = end.Sub(start)
+	log.Printf("Time spent on algorithm %.2f\n", elapsed.Seconds())
+
 }
