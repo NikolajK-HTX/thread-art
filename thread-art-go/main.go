@@ -62,6 +62,7 @@ func main() {
 	start := time.Now()
 
 	var imagePath string
+	var outputName string
 	var numberOfPins int
 	var rap int
 	var minimumDifference int
@@ -71,6 +72,8 @@ func main() {
 
 	flag.StringVar(&imagePath, "i", "../selfie-exposure.jpg",
 		"The path to the image.")
+	flag.StringVar(&outputName, "o", "output-image",
+		"Output filename. Do not include suffix.")
 	flag.IntVar(&numberOfPins, "n", 200,
 		"A higher amount of pins makes the result more precise.")
 	flag.IntVar(&rap, "t", 3000, "Amount of thread raps")
@@ -253,7 +256,7 @@ func main() {
 	}
 
 	// save image as png
-	outFile, err := os.Create("outimage.png")
+	outFile, err := os.Create(fmt.Sprintf("%s.png", outputName))
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -266,7 +269,8 @@ func main() {
 	outFile.Close()
 
 	// Write the list of pins the thread is going around
-	outPointFile, err := os.Create("pin-thread-list.txt")
+	outPointFile, err := os.Create(
+		fmt.Sprintf("%s-thread-pin-list.txt", outputName))
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

@@ -10,8 +10,8 @@ import (
 
 var letters = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
 
-func RandomString(length int, chars []byte) string {
-	clen := len(chars)
+func RandomString(length int) string {
+	clen := len(letters)
 	b := make([]byte, length)
 	r := make([]byte, length) // storage for random bytes.
 
@@ -22,7 +22,7 @@ func RandomString(length int, chars []byte) string {
 
 	for i, rb := range r {
 		c := int(rb)
-		b[i] = chars[c%clen]
+		b[i] = letters[c%clen]
 	}
 
 	return string(b)
@@ -36,7 +36,7 @@ func main() {
 		if req.Method == "POST" {
 			var _, _, _ = req.FormFile("imageupload")
 			// var file, fileHeader, err = req.FormFile("imageupload")
-			var filename = RandomString(10, letters)
+			var filename = RandomString(10)
 			filename = fmt.Sprintf("%v.png", filename)
 			fmt.Println(filename)
 
