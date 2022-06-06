@@ -14,7 +14,7 @@ import (
 
 var imagePath = "../selfie-exposure.jpg"
 var numberOfPoints = 200
-var rap = 1000
+var rap = 2000
 var minimumDifference = 20
 
 // var minimumDifference = int(math.Floor(float64(numberOfPoints) / 10.0))
