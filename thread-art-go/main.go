@@ -288,4 +288,18 @@ func main() {
 	elapsed = end.Sub(start)
 	log.Printf("Time spent on algorithm %.2f\n", elapsed.Seconds())
 
+	// unsafe.Sizeof returns the size in bytes of a hypothetical variable
+	// "For instance, if x is a slice, Sizeof returns the size of the
+	// slice descriptor, not the size of the memory referenced by the slice."
+	// - Go documentation
+	// It is not what is wanted here.
+	// log.Printf("decodedImage memory: %v", unsafe.Sizeof(decodedImage))
+	// log.Printf("grayImage memory: %v", unsafe.Sizeof(grayImage))
+	// log.Printf("drawImage memory: %v", unsafe.Sizeof(drawImage))
+	// log.Printf("Circle memory: %v", unsafe.Sizeof(circle))
+	// log.Printf("Lines memory: %v", unsafe.Sizeof(lines))
+	// The following line gives a way to tell how many bytes of memory
+	// a variable is using.
+	// v, _ := json.Marshal(lines)
+	// log.Println(len(v))
 }
