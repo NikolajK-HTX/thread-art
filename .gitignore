@@ -451,3 +451,4 @@ thread-art-go/main
 thread-art-go/outimage.png
 thread-art-py/knit.py
 thread-art-py/points.txt
+thread-art-server/uploads/*
