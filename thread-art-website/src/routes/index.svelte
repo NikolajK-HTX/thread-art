@@ -7,10 +7,10 @@
             return
         }
         
-        let url = "/upload";
+        let url = "http://localhost:8001/upload";
         let formData = new FormData();
 
-        formData.append("image", files[0]);
+        formData.append("imageupload", files[0]);
         console.log("hello")
 
         fetch(url, {
@@ -51,9 +51,6 @@
                     on:change="{upload}"
                 />
                 <span class="file-cta">
-                    <span class="file-icon">
-                        <i class="fas fa-upload" />
-                    </span>
                     <span class="file-label"> Choose an image... </span>
                 </span>
                 {#if errorMessage}
